@@ -20,6 +20,8 @@ const ModelViewer = ({
 }) => {
   const mountRef = useRef(null);
   const [timeOfDay, setTimeOfDay] = useState(5.5);
+  const [datetime, setDatetime] = useState("2024-10-26T11:28");
+  const [sunPosition, setSunPosition] = useState({ x: 0, y: 0, z: 0 });
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -150,13 +152,19 @@ console.log(child)
       const sunY = Math.max(Math.sin(angle) * 150, 10);
       const sunZ = 0;
 
-      directionalLight.position.set(sunX, sunY, sunZ);
+      //❌ directionalLight.position.set(sunX, sunY, sunZ);
+      directionalLight.position.set(
+        sunPosition.x,
+        sunPosition.y,
+        sunPosition.z
+      );
       directionalLight.target.updateMatrixWorld();
 
       // Update ArrowHelper to point in the new direction
       arrowHelper.position.copy(directionalLight.position);
       arrowHelper.setDirection(
-        new THREE.Vector3(-sunX, -sunY, -sunZ).normalize()
+        // ❌new THREE.Vector3(-sunX, -sunY, -sunZ).normalize()
+        new THREE.Vector3(-sunPosition.x, -sunPosition.y, -sunPosition.z).normalize()
       );
 
       // Raycasting logic
@@ -230,7 +238,34 @@ console.log(child)
       mountRef.current.removeChild(renderer.domElement);
       window.removeEventListener("resize", handleResize);
     };
-  }, [timeOfDay, shadowOpacity, shadowResolution, lightIntensity, modelScale]);
+  }, [timeOfDay, shadowOpacity, shadowResolution, lightIntensity, modelScale,sunPosition]);
+  const handleDatetimeSubmit = async () => {
+    try {
+      const formattedDatetime = `${datetime}:00`;
+      console.log("datetime",formattedDatetime.replace("T", " "))
+      const response = await fetch(
+        "https://solaris-vd5p.onrender.com/api/sun_position/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            datetime: formattedDatetime.replace("T", " "), // Convert to required format
+          }),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      setSunPosition(data); // Update the sun position
+    } catch (error) {
+      console.error("Error fetching sun position:", error);
+    }
+  };
 
   return (
     <div className="flex bg-gray-200">
@@ -252,6 +287,17 @@ console.log(child)
           style={{ width: "100%" }}
         />
         <p>Time of Day: {timeOfDay}</p>
+      </div>
+      <div>
+        <label>
+          Select Date and Time:
+          <input
+            type="datetime-local"
+            value={datetime}
+            onChange={(e) => setDatetime(e.target.value)}
+          />
+        </label>
+        <button onClick={handleDatetimeSubmit}>Submit</button>
       </div>
     </div>
   );

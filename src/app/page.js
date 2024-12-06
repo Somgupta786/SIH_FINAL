@@ -290,7 +290,7 @@ console.log(child)
       </div>
       <div>
         <label>
-          Select Date and Time:
+          Select Date and Time
           <input
             type="datetime-local"
             value={datetime}

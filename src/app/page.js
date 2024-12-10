@@ -21,7 +21,7 @@ const ModelViewer = ({
   const mountRef = useRef(null);
   const [timeOfDay, setTimeOfDay] = useState(5.5);
   const [datetime, setDatetime] = useState("2024-10-26T11:28");
-  const [sunPosition, setSunPosition] = useState({ x: 0, y: 0, z: 0 });
+  const [sunPosition, setSunPosition] = useState({ x: 0, y: 1, z: 0 });
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -123,7 +123,7 @@ const ModelViewer = ({
                   buildingScaleFactor,
                   buildingScaleFactor
                 );
-console.log(child)
+console.log("child",child)
                 scene.add(child);
                 // Calculate the height of the building by getting its bounding box
                 const boundingBox = new THREE.Box3().setFromObject(child);

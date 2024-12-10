@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
@@ -268,39 +267,11 @@ console.log("child",child)
   };
 
   return (
-    <div className="flex bg-gray-200">
-      <div
-        ref={mountRef}
-        style={{
-          width: "100%",
-          overflow: "auto",
-          height: "500px",
-        }}
+    <div className="flex flex-col w-[100vw] h-[100vh] p-4">
+      {/* Model Viewer Component */}
+      <ModelViewer
+      
       />
-      <div>
-        <input
-          type="range"
-          min="0"
-          max="24"
-          value={timeOfDay}
-          onChange={(e) => setTimeOfDay(Number(e.target.value))}
-          style={{ width: "100%" }}
-        />
-        <p>Time of Day: {timeOfDay}</p>
-      </div>
-      <div>
-        <label>
-          Select Date and Time
-          <input
-            type="datetime-local"
-            value={datetime}
-            onChange={(e) => setDatetime(e.target.value)}
-          />
-        </label>
-        <button onClick={handleDatetimeSubmit}>Submit</button>
-      </div>
     </div>
   );
-};
-
-export default ModelViewer;
+}

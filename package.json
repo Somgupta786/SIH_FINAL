@@ -12,6 +12,7 @@
     "@fontsource/anek-malayalam": "^5.1.0",
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
+    "axios": "^1.7.9",
     "chart.js": "^4.4.7",
     "leaflet": "^1.9.4",
     "next": "15.0.3",

@@ -4,6 +4,10 @@ export const sideNavData = [
       link: "/energy-projection",
     },
     {
+      title: "Impact Simulator",
+      link: "/impact-simulator",
+    },
+    {
       title: "3D Viewer",
       link: "/3D-viewer",
     },

@@ -238,8 +238,8 @@ const ModelViewer = ({
           const payload = {
             height: clickedMesh.userData.height.toString(),
             length: length.toString(),
-            width: width.toString(),
-            timestamp: formattedDatetime,
+            breadth: width.toString(),
+            date_time: formattedDatetime.replace("T", " "),
             latitude: clickedMesh.userData.latitude.toString(),
             longitude: clickedMesh.userData.longitude.toString(),
             solar_irradiance: "0.4",

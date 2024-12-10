@@ -81,17 +81,24 @@ const ModelViewer = ({
     );
     scene.add(arrowHelper);
 
-    const groundSize = 300;
+    const groundSize = 1000;
+    // Load grass texture
+    const textureLoader = new THREE.TextureLoader();
+    const grassTexture = textureLoader.load("/new.jpg");
+    grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping;
+    grassTexture.repeat.set(50, 50); // Adjust the repeat to fit the ground size
 
-    const groundGeometry = new THREE.PlaneGeometry(groundSize + 20, 520);
-
-    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xf0e170 });
+    // const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xf0e170 });
+    const groundMaterial = new THREE.MeshStandardMaterial({
+      map: grassTexture,
+    });
+    const groundGeometry = new THREE.PlaneGeometry(groundSize, 1600);
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = 0;
     ground.receiveShadow = true;
     scene.add(ground);
-
+    camera.position.set(0, 100, 200);
     const mtlLoader = new MTLLoader();
     mtlLoader.setPath(modelPath);
     mtlLoader.load(mtlFile, (materials) => {
@@ -111,17 +118,22 @@ const ModelViewer = ({
             object.children.forEach((child) => {
               if (child.isMesh) {
                 child.material = child.material.clone();
-                child.material.color.set(0xffffff);
+                const color = getColorByHeight(
+                  geoJson.features[buildingId].properties.height
+                );
+                console.log(color);
+                child.material.color.set(color);
                 child.userData.isBuilding = true;
                 child.userData.buildingId = buildingId;
                 child.castShadow = true;
                 child.userData.latitude =
                   geoJson.features[buildingId].properties.latitude;
-                  child.userData.height = geoJson.features[buildingId].properties.height;
+                child.userData.height =
+                  geoJson.features[buildingId].properties.height;
                 child.userData.longitude =
                   geoJson.features[buildingId++].properties.longitude;
 
-                const buildingScaleFactor = 0.1;
+                const buildingScaleFactor = 0.3;
                 child.scale.set(
                   buildingScaleFactor,
                   buildingScaleFactor,
@@ -145,8 +157,25 @@ const ModelViewer = ({
       });
     });
 
-    camera.position.set(0, 100, 200);
+    camera.position.set(0, 50, 150);
 
+    const getColorByHeight = (height) => {
+      if (height < 5) {
+        return 0xe699ab; // Hexadecimal value without quotes
+      } else if (height >= 5 && height <= 10) {
+        return 0x6e6100;
+      } else if (height >= 11 && height <= 15) {
+        return 0x5800e5;
+      } else if (height >= 16 && height <= 20) {
+        return 0xe5ca00;
+      } else if (height >= 21 && height <= 25) {
+        return 0x2be57f;
+      } else if (height >= 26 && height <= 30) {
+        return 0x177b44;
+      } else {
+        return 0x730000;
+      }
+    };
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -228,7 +257,7 @@ const ModelViewer = ({
 
           // Calculate dimensions
           const boundingBox = new THREE.Box3().setFromObject(clickedMesh);
-        
+
           const length = boundingBox.max.x - boundingBox.min.x;
           const width = boundingBox.max.z - boundingBox.min.z;
 
@@ -327,7 +356,7 @@ const ModelViewer = ({
       <div
         ref={mountRef}
         className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
-        style={{ overflow: "auto", height: "500px" }}
+        style={{ overflow: "auto", height: "90vh" }}
       />
       <div className="p-4 space-y-6 w-1/3 bg-white border-l border-gray-300">
         <div className="space-y-2">

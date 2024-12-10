@@ -1,303 +1,383 @@
+"use client";
 
-'use client';
-
-import React, { useEffect,useState, useRef } from 'react';
-import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import React, { useEffect, useState, useRef } from "react";
+import * as THREE from "three";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import axios from "axios";
 
 const ModelViewer = ({
-  shadowOpacity = 0.5, // Controls the opacity of shadows on the ground
-  shadowResolution = 2048, // Sets the resolution of shadow maps for directional light
-  lightIntensity = 1, // Intensity of the directional light
-  modelScale = 10, // Scaling factor for the 3D model
-  modelPath = '/models/', // Base path for the model files
-  objFile = 'eeshu1.obj', // Name of the .OBJ file
-  mtlFile = 'eeshu1.mtl', // Name of the .MTL file
+  shadowOpacity = 0.5,
+  shadowResolution = 2048,
+  lightIntensity = 1,
+  modelScale = 10,
+  modelPath = "/models/",
+  objFile = "eeshu.obj",
+  mtlFile = "eeshu.mtl",
+  geoJsonPath = "/models/eeshu_geo.geojson",
 }) => {
-  const mountRef = useRef(null); // Reference to the mounting DOM element
-
+  const mountRef = useRef(null);
   const [timeOfDay, setTimeOfDay] = useState(5.5);
-  const compassRef = useRef(null); 
-  const [direction, setDirection] = useState('North'); // State for compass direction
+  const [datetime, setDatetime] = useState("2024-10-26T11:28");
+  const [sunPosition, setSunPosition] = useState({ x: 90, y: 90, z: 0 });
+  const [ghi, setGhi] = useState("");
 
   useEffect(() => {
-    // Initialize the Three.js scene
     const scene = new THREE.Scene();
-
-    // Set up the camera with perspective projection
     const camera = new THREE.PerspectiveCamera(
-      3, // Field of view in degrees
-      mountRef.current.clientWidth / mountRef.current.clientHeight, // Aspect ratio
-      0.1, // Near clipping plane
-      1000 // Far clipping plane
+      75,
+      mountRef.current.clientWidth / mountRef.current.clientHeight,
+      1,
+      1000
     );
 
-    // Create the WebGL renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true }); // Enable antialiasing for smoother edges
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(
       mountRef.current.clientWidth,
       mountRef.current.clientHeight
     );
-    renderer.setClearColor(0xeeeeee); // Set background color to light gray
-    renderer.shadowMap.enabled = true; // Enable shadow rendering
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Use soft shadows for better visuals
-    mountRef.current.appendChild(renderer.domElement); // Append the renderer to the DOM
+    renderer.setClearColor(0xeeeeee);
+    renderer.shadowMap.enabled = true;
+    mountRef.current.appendChild(renderer.domElement);
 
-    // Add orbit controls for interactive rotation, zoom, and panning
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; // Enable smooth interaction
-    controls.dampingFactor = 0.5; // Define damping strength
-    controls.minDistance = 10; // Set minimum zoom distance
-    controls.maxDistance = 500; // Set maximum zoom distance
-    controls.minPolarAngle = 0; // Prevent looking below the ground (upward angle)
-    controls.maxPolarAngle = Math.PI / 2; // Limit to looking straight at or above the ground (90 degrees)
-    
-    const updateCompassDirection = () => {
-      const angle = Math.atan2(camera.position.x, camera.position.z);
-      const degree = (angle * (180 / Math.PI) + 360) % 360;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.5;
+    controls.minDistance = 1;
+    controls.maxDistance = 500;
+    controls.minPolarAngle = 0;
+    controls.maxPolarAngle = Math.PI / 2;
 
-      if (degree >= 315 || degree < 45) setDirection('North');
-      else if (degree >= 45 && degree < 135) setDirection('East');
-      else if (degree >= 135 && degree < 225) setDirection('South');
-      else setDirection('West');
-    };
-    const updateCompassRotation = () => {
-      const vector = new THREE.Vector3(0, 0, -1);
-      vector.applyQuaternion(camera.quaternion); // Rotate vector based on camera orientation
-      const angle = Math.atan2(vector.x, vector.z); // Calculate rotation angle
-      const degree = (angle * (180 / Math.PI) + 360) % 360; // Convert to degrees
-
-      // Rotate the compass
-      if (compassRef.current) {
-        compassRef.current.style.transform = `rotate(${degree}deg)`;
-      }
-    };
-
-    // Add ambient light to illuminate the scene
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // Soft general illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
 
-    // Add directional light for shadows and focused illumination
-    const directionalLight = new THREE.DirectionalLight(0xffffff, lightIntensity  );
-    directionalLight.position.set(50, 100, 50); // Set light source position
-    directionalLight.castShadow = true; // Enable casting shadows
-    directionalLight.shadow.mapSize.width = shadowResolution; // Set shadow resolution
+    const directionalLight = new THREE.DirectionalLight(
+      0xffffff,
+      lightIntensity
+    );
+    directionalLight.position.set(100, 200, 100);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = shadowResolution;
     directionalLight.shadow.mapSize.height = shadowResolution;
-    directionalLight.shadow.camera.near = 1; // Define shadow camera near plane
-    directionalLight.shadow.camera.far = 500; // Define shadow camera far plane
-    directionalLight.shadow.camera.left = -100; // Set shadow camera bounds
-    directionalLight.shadow.camera.right = 100;
-    directionalLight.shadow.camera.top = 100;
-    directionalLight.shadow.camera.bottom = -100;
+
+    // Shadow camera adjustments
+    directionalLight.shadow.camera.left = -150;
+    directionalLight.shadow.camera.right = 150;
+    directionalLight.shadow.camera.top = 150;
+    directionalLight.shadow.camera.bottom = -150;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 500;
+
     scene.add(directionalLight);
 
-    // Create a ground plane to receive shadows
-    const groundGeometry = new THREE.PlaneGeometry(300, 300); // Large flat plane
-    const groundshadow = new THREE.ShadowMaterial({opacity: shadowOpacity }); // Semi-transparent shadow material
+    // ArrowHelper for light source visualization
+    const lightDirection = new THREE.Vector3(-1, -1, 0).normalize();
+    const arrowHelper = new THREE.ArrowHelper(
+      lightDirection,
+      directionalLight.position,
+      50,
+      0xff0000 // Red color
+    );
+    scene.add(arrowHelper);
+
+    const groundSize = 300;
+
+    const groundGeometry = new THREE.PlaneGeometry(groundSize + 20, 520);
+
     const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xf0e170 });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial,groundshadow);
-    ground.rotation.x = -Math.PI / 2; // Rotate plane to be horizontal
-    ground.position.y = -1.5; // Position the ground slightly below the model
-    ground.receiveShadow = true; // Enable receiving shadows
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = 0;
+    ground.receiveShadow = true;
     scene.add(ground);
 
-
-    // Load and configure the 3D model
     const mtlLoader = new MTLLoader();
-    mtlLoader.setPath(modelPath); // Set the path to the .MTL file
+    mtlLoader.setPath(modelPath);
     mtlLoader.load(mtlFile, (materials) => {
-      materials.preload(); // Preload the materials
+      materials.preload();
+      // Load GeoJSON data
+      const loader = new THREE.FileLoader();
+      loader.load(geoJsonPath, (geoJsonData) => {
+        const geoJson = JSON.parse(geoJsonData);
+        console.log(geoJson.features);
+        const objLoader = new OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.setPath(modelPath);
+        objLoader.load(
+          objFile,
+          (object) => {
+            let buildingId = 0;
+            object.children.forEach((child) => {
+              if (child.isMesh) {
+                child.material = child.material.clone();
+                child.material.color.set(0xffffff);
+                child.userData.isBuilding = true;
+                child.userData.buildingId = buildingId;
+                child.castShadow = true;
+                child.userData.latitude =
+                  geoJson.features[buildingId].properties.latitude;
+                  child.userData.height = geoJson.features[buildingId].properties.height;
+                child.userData.longitude =
+                  geoJson.features[buildingId++].properties.longitude;
 
-      // Load the .OBJ model using the materials
-      const objLoader = new OBJLoader();
-      objLoader.setMaterials(materials);
-      objLoader.setPath(modelPath); // Set the path to the .OBJ file
-      objLoader.load(
-        objFile, // File name of the .OBJ model
-        (object) => {
-          // Configure the model for shadows
-          object.traverse((child) => {
-            if (child.isMesh) {
-              child.castShadow = true; // Enable the model to cast shadows
-              child.receiveShadow = true; // Enable the model to receive shadows
-            }
-          });
+                const buildingScaleFactor = 0.1;
+                child.scale.set(
+                  buildingScaleFactor,
+                  buildingScaleFactor,
+                  buildingScaleFactor
+                );
 
-          object.scale.set(modelScale, modelScale, modelScale); // Scale the model
-          object.position.y = 0; // Position the model above the ground
-          scene.add(object); // Add the model to the scene
-        },
-        undefined,
-        (error) => {
-          console.error('Error loading OBJ:', error); // Log any errors during model loading
-        }
-      );
+                scene.add(child);
+                // // Calculate the height of the building by getting its bounding box
+                // const boundingBox = new THREE.Box3().setFromObject(child);
+                // const height = boundingBox.max.y - boundingBox.min.y;
+              }
+            });
+
+            object.scale.set(modelScale, modelScale, modelScale);
+          },
+          undefined,
+          (error) => {
+            console.error("Error loading OBJ:", error);
+          }
+        );
+      });
     });
 
+    camera.position.set(0, 100, 200);
 
-    
-    // Set the initial camera position
-    camera.position.set(0, 100, 200); // Position the camera for a good view
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-
-    // const updateSunPosition = () => {
-    //   const angle = (timeOfDay / 24) * Math.PI * 2; // Convert time to radians
-    //   directionalLight.position.set(
-    //     Math.cos(angle) * 100, // X position
-    //     Math.sin(angle) * 100, // Y position (height)
-    //     50 // Z position
-    //   );
-    //   directionalLight.target.position.set(0, 0, 0); // Target the scene center
-    //   directionalLight.target.updateMatrixWorld(); // Update the target
-    // };
     const updateSunPosition = () => {
-      // Convert time to radians (0 to 2π for a full day)
       const angle = (timeOfDay / 24) * Math.PI * 2;
-    
-      // Calculate sun's horizontal position (X) and height (Y)
-      // Sunrise starts in the East (X > 0), moves to noon (highest point), and sets in the West (X < 0)
-      const sunX = Math.cos(angle) * 150; // Horizontal position of the sun
-      const sunY = Math.max(Math.sin(angle) * 150, 10); // Vertical position (minimum 10 to avoid negative height)
-      const sunZ = 0; // Fixed Z-axis for simplicity (sun moves East to West)
-    
-      // Set the directional light's position to simulate the sun
-      directionalLight.position.set(sunX, sunY, sunZ);
-    
-      // Minimize shadow intensity and softness at noon
-      const isNoon = timeOfDay === 12; // Check if it's noon
-      directionalLight.intensity = isNoon ? 1.0 : lightIntensity; // Slightly higher light intensity at noon
-      directionalLight.shadow.radius = isNoon ? 0.2 : 1; // Softer shadows during other times
-    
-      // Adjust shadow opacity based on the sun's height (higher sun = less shadow)
-      groundshadow.opacity = 1 - sunY / 150; // Example: Fully visible shadows at sunrise/sunset, minimal at noon
-    
-      // Update the target to point to the center of the scene
-      directionalLight.target.position.set(0, 0, 0);
+      const sunX = Math.cos(angle) * 150;
+      const sunY = Math.max(Math.sin(angle) * 150, 10);
+      const sunZ = 0;
+
+      //❌ directionalLight.position.set(sunX, sunY, sunZ);
+      directionalLight.position.set(
+        sunPosition.x,
+        sunPosition.y,
+        sunPosition.z
+      );
       directionalLight.target.updateMatrixWorld();
+
+      // Update ArrowHelper to point in the new direction
+      arrowHelper.position.copy(directionalLight.position);
+      arrowHelper.setDirection(
+        // ❌new THREE.Vector3(-sunX, -sunY, -sunZ).normalize()
+        new THREE.Vector3(
+          -sunPosition.x,
+          -sunPosition.y,
+          -sunPosition.z
+        ).normalize()
+      );
+
+      // Raycasting logic
+      raycaster.set(
+        directionalLight.position,
+        new THREE.Vector3(-sunX, -sunY, -sunZ).normalize()
+      );
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      // Highlight intersected objects
+      scene.children.forEach((child) => {
+        if (child.isMesh && child.userData.isBuilding) {
+          child.material.emissive.setHex(0x000000); // Reset color
+        }
+      });
+
+      intersects.forEach((intersect) => {
+        if (intersect.object.userData.isBuilding) {
+          intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
+        }
+      });
     };
-    
-    
-    // Animation loop for rendering the scene
+
     const animate = () => {
-      requestAnimationFrame(animate); // Schedule the next frame
-      controls.update(); // Update the controls for smooth interaction
-      updateSunPosition(); // Update sun position in each frame
-      updateCompassDirection();
-      updateCompassRotation(); 
-      renderer.render(scene, camera); // Render the scene
+      requestAnimationFrame(animate);
+      controls.update();
+      updateSunPosition();
+      renderer.render(scene, camera);
     };
     animate();
+    const handleMouseClick = async (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-    const handleKeyDown = (event) => {
-      switch (event.key) {
-        case 'ArrowUp': // Move camera up
-          camera.position.y += 10;
-          break;
-        case 'ArrowDown': // Move camera down
-          camera.position.y -= 10;
-          break;
-        case 'ArrowLeft': // Move camera left
-          camera.position.x -= 10;
-          break;
-        case 'ArrowRight': // Move camera right
-          camera.position.x += 10;
-          break;
+      // Cast a ray
+      raycaster.setFromCamera(mouse, camera);
+
+      // Intersect with all objects
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      if (intersects.length > 0) {
+        // Get the exact clicked object
+        const clickedMesh = intersects.find(
+          (intersect) => intersect.object.userData.isBuilding
+        )?.object;
+
+        if (clickedMesh) {
+          console.log("Clicked building:", clickedMesh);
+
+          // Highlight the clicked building
+          clickedMesh.material.color.set(0xff0000); // Set to red
+
+          // Calculate dimensions
+          const boundingBox = new THREE.Box3().setFromObject(clickedMesh);
+        
+          const length = boundingBox.max.x - boundingBox.min.x;
+          const width = boundingBox.max.z - boundingBox.min.z;
+
+          // Get the current date and time
+          const formattedDatetime = `${datetime}:00`;
+
+          const payload = {
+            height: clickedMesh.userData.height.toString(),
+            length: length.toString(),
+            width: width.toString(),
+            timestamp: formattedDatetime,
+            latitude: clickedMesh.userData.latitude.toString(),
+            longitude: clickedMesh.userData.longitude.toString(),
+            solar_irradiance: "0.4",
+          };
+          console.log("Payload to send:", payload);
+
+          try {
+            // Call the API
+            const response = await axios.post(
+              "https://solaris-vd5p.onrender.com/api/solar_potential/",
+              payload,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            console.log("API Response:", response.data);
+
+            // Highlight the clicked building
+            clickedMesh.material.color.set(0xff0000); // Set to red
+          } catch (error) {
+            console.error("Error calling API:", error);
+          }
+        }
       }
-      controls.update(); // Ensure controls are updated after position change
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("click", handleMouseClick);
 
-    // Handle window resizing to adjust the renderer and camera
     const handleResize = () => {
-      camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight; // Update aspect ratio
-      camera.updateProjectionMatrix(); // Recalculate projection matrix
+      camera.aspect =
+        mountRef.current.clientWidth / mountRef.current.clientHeight;
+      camera.updateProjectionMatrix();
       renderer.setSize(
         mountRef.current.clientWidth,
         mountRef.current.clientHeight
       );
     };
-    window.addEventListener('resize', handleResize); // Listen for resize events
+    window.addEventListener("resize", handleResize);
 
-    // Cleanup function to remove event listeners and DOM elements
     return () => {
-      mountRef.current.removeChild(renderer.domElement); // Remove renderer from DOM
-      window.removeEventListener('resize', handleResize); // Remove resize listener
-      window.removeEventListener('keydown', handleKeyDown); // Cleanup keydown listener
+      mountRef.current.removeChild(renderer.domElement);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [timeOfDay,shadowOpacity, shadowResolution, lightIntensity, modelScale, modelPath, objFile, mtlFile]); // Dependencies for useEffect
+  }, [
+    timeOfDay,
+    shadowOpacity,
+    shadowResolution,
+    lightIntensity,
+    modelScale,
+    sunPosition,
+  ]);
+  const handleDatetimeSubmit = async () => {
+    try {
+      const formattedDatetime = `${datetime}:00`;
+      console.log("datetime", formattedDatetime.replace("T", " "));
+      const response = await fetch(
+        "https://solaris-vd5p.onrender.com/api/sun_position/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            datetime: formattedDatetime.replace("T", " "), // Convert to required format
+          }),
+        }
+      );
 
-  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setSunPosition(data); // Update the sun position
+    } catch (error) {
+      console.error("Error fetching sun position:", error);
+    }
+  };
+
   return (
-    <div className="flex bg-gray-200">
-          <div
-        ref={compassRef} // Compass reference
-        style={{
-          position:"absolute",
-          right:"0px",
-          top:"0px",
-          width: '100px',
-          height: '100px',
-          background: 'url("/compass.jpg") no-repeat center center',
-          backgroundSize: 'contain',
-          transformOrigin: 'center', // Rotate from center
-        }}
-      ></div>
-      <p>3D Model Viewer</p>
-      
+    <div className="flex bg-gray-200 h-screen">
       <div
-        ref={mountRef} // Attach the DOM reference
-        style={{
-          width: '100%', // Full width
-          overflow: 'auto', // Prevent content overflow
-          height: '500px', // Fixed height
-        }}
-      /> 
-      <hr/>
-      <div
-        style={{
-          padding: '10px',
-          background: 'rgba(255, 255, 255, 0.8)',
-          borderRadius: '5px',
-        }}
-      >
-        <strong>Compass:</strong> {direction}
-      </div>
-      <hr/>
-      <div>
-      <input
-        type="range"
-        min="0"
-        max="24"
-        value={timeOfDay}
-        onChange={(e) => setTimeOfDay(Number(e.target.value))}
-        style={{ width: '100%' }}
+        ref={mountRef}
+        className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
+        style={{ overflow: "auto", height: "500px" }}
       />
-      <hr/><hr/>
-
-      <hr/><hr/>
-      <p>Time of Day: {timeOfDay} (0 = Midnight, 24 = Next Midnight)</p>
-      </div>
-      <hr/>
-      <hr/>
-      <div>
-        <strong>Controls</strong>
-        <div>
-          <p><strong>Action</strong>: Click and drag with the left mouse button.</p>
-          <p><strong>Effect</strong>: Rotates the scene around the model based on the mouse movement.</p>
-       </div>
-       <hr/>
-        <div>
-          <p><strong>Action</strong>: Click and drag with the right mouse button or use the middle mouse button (scroll wheel press).</p>
-          <p><strong>Effect</strong>: Moves the camera horizontally or vertically without rotating, providing a different perspective.</p>
+      <div className="p-4 space-y-6 w-1/3 bg-white border-l border-gray-300">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Time of Day
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="24"
+            step="0.1"
+            value={timeOfDay}
+            onChange={(e) => setTimeOfDay(Number(e.target.value))}
+            className="w-full"
+          />
+          <p className="text-sm text-gray-500">
+            Selected Time: {timeOfDay} hrs
+          </p>
         </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Select Date and Time
+          </label>
+          <input
+            type="datetime-local"
+            value={datetime}
+            onChange={(e) => setDatetime(e.target.value)}
+            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            GHI Value
+          </label>
+          <input
+            type="number"
+            value={ghi}
+            onChange={(e) => setGhi(e.target.value)}
+            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <button
+          onClick={handleDatetimeSubmit}
+          className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Submit
+        </button>
       </div>
     </div>
   );
 };
 
 export default ModelViewer;
-
-

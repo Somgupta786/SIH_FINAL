@@ -1,18 +1,12 @@
 import React, { useState } from "react";
 
-const ReportButton = () => {
-  const [activeButton, setActiveButton] = useState("monthly");
+const ReportButton = ({ activeButton, setActiveButton, selectedRange, setSelectedRange }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedRange, setSelectedRange] = useState("Jan to July"); // Track selected range
-
-  const toggleDropdown = () => {
-    setDropdownVisible(!dropdownVisible);
-  };
 
   return (
     <div className="flex flex-col gap-5 mt-3">
       <div className="flex gap-5">
-        {/* Monthly Report Button with Dropdown Icon */}
+        {/* Monthly Report Button */}
         <button
           className={`flex items-center gap-2 px-4 py-2 rounded ${
             activeButton === "monthly"
@@ -21,7 +15,7 @@ const ReportButton = () => {
           }`}
           onClick={() => {
             setActiveButton("monthly");
-            setDropdownVisible(!dropdownVisible); // Toggle dropdown visibility
+            setDropdownVisible(!dropdownVisible);
           }}
         >
           Monthly Report
@@ -52,7 +46,7 @@ const ReportButton = () => {
           }`}
           onClick={() => {
             setActiveButton("seasonal");
-            setDropdownVisible(false); // Close dropdown
+            setDropdownVisible(false);
           }}
         >
           Seasonal Report
@@ -69,7 +63,7 @@ const ReportButton = () => {
               }`}
               onClick={() => {
                 setSelectedRange("Jan to July");
-                setDropdownVisible(false); // Close dropdown
+                setDropdownVisible(false);
               }}
             >
               Jan to July
@@ -80,20 +74,13 @@ const ReportButton = () => {
               }`}
               onClick={() => {
                 setSelectedRange("Aug to Dec");
-                setDropdownVisible(false); // Close dropdown
+                setDropdownVisible(false);
               }}
             >
               Aug to Dec
             </li>
           </ul>
         </div>
-      )}
-
-      {/* Display Selected Range */}
-      {selectedRange && activeButton === "monthly" && (
-        <p className="text-gray-700">
-          Selected Range: <span className="font-medium">{selectedRange}</span>
-        </p>
       )}
     </div>
   );

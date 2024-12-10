@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import "../globals.css";
 import SideBar from "@/components/Common/SideBar";
-
+import "@fontsource/anek-malayalam"; // Defaults to regular weight
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -24,9 +24,9 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex min-h-screen bg-backgroundGreen">
+        <div className="flex min-h-screen bg-backgroundGreen font-anek">
         <SideBar/>
-        <div className="bg-white grow rounded-3xl pl-10 pr-8 py-10 overflow-y-scroll">{children}</div>
+        <div className="bg-white grow rounded-3xl pl-10 pr-8 py-10 overflow-y-scroll font-anek">{children}</div>
         </div>
         
       </body>

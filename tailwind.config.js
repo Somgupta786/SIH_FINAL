@@ -24,7 +24,8 @@ module.exports = {
         textLightSecondary: "#92989F",
         textGray:"#9e9e9e",
         textBlackPrimary:"#030303",
-      }
+      },
+      
     },
   },
   plugins: [],

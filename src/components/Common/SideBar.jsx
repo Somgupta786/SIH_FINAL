@@ -10,7 +10,7 @@ const SideBar = () => {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col items-center gap-10 bg-backgroundGreen py-10 px-5">
+    <div className="flex flex-col items-center gap-10 bg-backgroundGreen py-10 px-5 min-w-[14rem]">
       <Image className="w-36" src={Logo} alt="Logo" />
       <div className="flex flex-col gap-4">
         {sideNavData.map(({ title, link }, index) => {

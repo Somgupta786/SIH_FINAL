@@ -48,3 +48,13 @@ body {
 ::-webkit-scrollbar-track:hover {
   background: #1B263B; /* Track color on hover */
 }
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}

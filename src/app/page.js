@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import ModelViewer from "@/components/ModelViewer/modelViewer";
+// import ModelViewer from "@/components/HeatMap/heatMap";
 
 const Page = () => {
 

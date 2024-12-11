@@ -9,6 +9,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import InputSelection from "../Dashboard/input-slider/page";
 
 import axios from "axios";
+import LineChart from "../Charts/LineChart";
+import LineChartDropDown from "./LineChartDropDown";
+import SlideInComponent from "../Common/SlideInComponent";
 
 const ModelViewer = ({
   shadowOpacity = 0.9,
@@ -26,6 +29,9 @@ const ModelViewer = ({
   const [sunPosition, setSunPosition] = useState({ x: 90, y: 90, z: 180 });
   const [ghi, setGhi] = useState("");
   const [needleRotation, setNeedleRotation] = useState(0);
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [labelData, setLabelData] = useState([]);
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -111,7 +117,7 @@ const ModelViewer = ({
     );
     scene.add(arrowHelper2);
 
-    const groundSize =750;
+    const groundSize = 750;
     // Load grass texture
     const textureLoader = new THREE.TextureLoader();
     const grassTexture = textureLoader.load("/try.webp");
@@ -147,10 +153,13 @@ const ModelViewer = ({
             let buildingId = 0;
             object.children.forEach((child) => {
               if (child.isMesh) {
+
+
                 // if(child.name=="21.007"){console.log(child)
                 //   child.material[2].color.set(0x000000);
                 // }
                 
+
                 // child.material = child.material.clone();
                 // const color = getColorByHeight(
                 //   geoJson.features[buildingId].properties.height
@@ -327,20 +336,21 @@ const ModelViewer = ({
           const length = boundingBox.max.x - boundingBox.min.x;
           const width = boundingBox.max.z - boundingBox.min.z;
 
-          const formattedDatetime = `${datetime}:00`;
+          const formattedDatetime = selectedDate.toISOString().split("T")[0];
           const payload = {
             height: clickedMesh.userData.height.toString(),
             length: length.toString(),
             breadth: width.toString(),
-            date_time: formattedDatetime.replace("T", " "),
+            date: formattedDatetime,
             latitude: clickedMesh.userData.latitude.toString(),
             longitude: clickedMesh.userData.longitude.toString(),
             solar_irradiance: "0.4",
           };
+          console.log("payload", payload);
 
           try {
             const response = await axios.post(
-              "https://solaris-vd5p.onrender.com/api/solar_potential/",
+              "https://solaris-1.onrender.com/api/solar_potential/",
               payload,
               {
                 headers: {
@@ -348,7 +358,8 @@ const ModelViewer = ({
                 },
               }
             );
-            console.log("API Response:", response.data);
+            console.log("API Response for graph:", response.data);
+            setLabelData(response.data.rooftop_hourly_potential_kwh);
           } catch (error) {
             console.error("Error calling API:", error);
           }
@@ -370,7 +381,9 @@ const ModelViewer = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      mountRef.current.removeChild(renderer.domElement);
+      if (mountRef.current) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
       window.removeEventListener("resize", handleResize);
     };
   }, [
@@ -399,7 +412,7 @@ const ModelViewer = ({
       );
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+        // throw new Error(Error: ${response.status} ${response.statusText})
       }
 
       const data = await response.json();
@@ -410,24 +423,39 @@ const ModelViewer = ({
   };
 
   return (
-    <div className="flex bg-gray-200 h-screen overflow-hidden">
-      {/* Add the legend image */}
-      <img
-        src="/try.svg" // Update the path to your image
-        alt="Building Height Legend"
-        className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
-      />
-      
-      <div
-        ref={mountRef}
-        className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
-        style={{ overflow: "auto", height: "90vh" , width:"100%" }}
-      />
+    <>
+      <div className="flex bg-gray-200 h-[95vh] overflow-hidden">
+        {/* Add the legend image */}
+        <img
+          src="/try.svg" // Update the path to your image
+          alt="Building Height Legend"
+          className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-black border-2 border-black   rounded shadow-md"
+        />
 
-      <div className=" absolute right-10 top-8">
-        <InputSelection/>
+        <div
+          ref={mountRef}
+          className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
+          style={{ overflow: "auto", height: "90vh", width: "100%" }}
+        />
+
+        <div className=" absolute right-10 top-8">
+          <InputSelection
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            onSubmit={handleDatetimeSubmit}
+          />
+        </div>
       </div>
-    </div>
+      {/* Line Chart */}
+      
+      {labelData.length > 0 && (
+        <div className="absolute bottom-0 w-[80%]" >
+        <SlideInComponent> 
+      <LineChartDropDown labelData={labelData} />
+      </SlideInComponent>
+        </div>
+      ) }
+    </>
   );
 };
 

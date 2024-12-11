@@ -298,11 +298,7 @@ const ModelViewer = ({
 
           // Highlight the clicked building
           clickedMesh.material.color.set(0xff0000); // Set to red
-          clickedMesh.scale.set(
-            0.25,
-            0.4,
-            0.25
-          );
+
 
           // Add ripple effect at the click position
           const ripple = document.createElement("div");
@@ -372,7 +368,12 @@ const ModelViewer = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
+
+      if(mountRef.current){
+      
+
       // mountRef.current.removeChild(renderer.domElement);
+
       window.removeEventListener("resize", handleResize);
     };
   }, [

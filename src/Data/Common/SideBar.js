@@ -20,6 +20,10 @@ export const sideNavData = [
       link: "/BIPV-reports",
     },
     {
+      title: "Heat Map",
+      link: "/heat-map",
+    },
+    {
       title: "Settings",
       link: "/settings",
     },

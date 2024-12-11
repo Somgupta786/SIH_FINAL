@@ -16,8 +16,8 @@ const ModelViewer = ({
   lightIntensity = 1,
   modelScale = 10,
   modelPath = "/models/",
-  objFile = "updated.obj",
-  mtlFile = "updated.mtl",
+  objFile = "eeshu.obj",
+  mtlFile = "eeshu.mtl",
   geoJsonPath = "/models/eeshu_geo.geojson",
 }) => {
   const mountRef = useRef(null);
@@ -148,12 +148,12 @@ const ModelViewer = ({
             object.children.forEach((child) => {
               if (child.isMesh) {
                 console.log(child)
-                // child.material = child.material.clone();
-                // const color = getColorByHeight(
-                //   geoJson.features[buildingId].properties.height
-                // );
-                // console.log(color);
-                // child.material.color.set(color);
+                child.material = child.material.clone();
+                const color = getColorByHeight(
+                  geoJson.features[buildingId].properties.height
+                );
+                console.log(color);
+                child.material.color.set(color);
                 child.userData.isBuilding = true;
                 child.userData.buildingId = buildingId;
                 child.castShadow = true;
@@ -254,18 +254,18 @@ const ModelViewer = ({
       );
       const intersects = raycaster.intersectObjects(scene.children, true);
 
-      // // Highlight intersected objects
-      // scene.children.forEach((child) => {
-      //   if (child.isMesh && child.userData.isBuilding) {
-      //     child.material.emissive.setHex(0x000000); // Reset color
-      //   }
-      // });
+      // Highlight intersected objects
+      scene.children.forEach((child) => {
+        if (child.isMesh && child.userData.isBuilding) {
+          child.material.emissive.setHex(0x000000); // Reset color
+        }
+      });
 
-      // intersects.forEach((intersect) => {
-      //   if (intersect.object.userData.isBuilding) {
-      //     intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
-      //   }
-      // });
+      intersects.forEach((intersect) => {
+        if (intersect.object.userData.isBuilding) {
+          intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
+        }
+      });
     };
 
     const animate = () => {
@@ -296,8 +296,8 @@ const ModelViewer = ({
         if (clickedMesh) {
           console.log("Clicked building:", clickedMesh);
 
-          // // Highlight the clicked building
-          // clickedMesh.material.color.set(0xff0000); // Set to red
+          // Highlight the clicked building
+          clickedMesh.material.color.set(0xff0000); // Set to red
 
           // Add ripple effect at the click position
           const ripple = document.createElement("div");
@@ -367,7 +367,8 @@ const ModelViewer = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      mountRef.current.removeChild(renderer.domElement);
+      if(mountRef.current){
+      mountRef.current.removeChild(renderer.domElement);}
       window.removeEventListener("resize", handleResize);
     };
   }, [

@@ -47,6 +47,7 @@ const LineChart = ({
           },
           y: {
             beginAtZero: true,
+           suggestedMax: 9,
             title: {
               display: true,
               text: yAxisLabel,

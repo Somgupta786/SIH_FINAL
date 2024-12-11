@@ -7,9 +7,8 @@ import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import TWEEN from "@tweenjs/tween.js";
 import InputSelection from "../Dashboard/input-slider/page";
-import SlideInComponent from "../Common/SlideInComponent";
+
 import axios from "axios";
-import DropDown3dViewer from "../Dashboard/3dViewer/DropDown";
 
 const ModelViewer = ({
   shadowOpacity = 0.9,
@@ -27,14 +26,6 @@ const ModelViewer = ({
   const [sunPosition, setSunPosition] = useState({ x: 180, y: 90, z: 360 });
   const [ghi, setGhi] = useState("");
   const [needleRotation, setNeedleRotation] = useState(0);
-
-  const [selectedDate3d, setSelectedDate3d] = useState(new Date());
-  const [labelData3d, setLabelData3d] = useState([]);
-
-  const [dropdownVisible3d,setDropdownVisible3d] = useState(1)
-  const [selectedDropdown3d,setSelectedDropdown3d] = useState('face1')
-  const [isVisible, setisVisible]=useState(false)
-  // const [ avg]
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -146,7 +137,7 @@ const ModelViewer = ({
       const loader = new THREE.FileLoader();
       loader.load(geoJsonPath, (geoJsonData) => {
         const geoJson = JSON.parse(geoJsonData);
-        // console.log(geoJson.features);
+        console.log(geoJson.features);
         const objLoader = new OBJLoader();
         objLoader.setMaterials(materials);
         objLoader.setPath(modelPath);
@@ -156,12 +147,12 @@ const ModelViewer = ({
             let buildingId = 0;
             object.children.forEach((child) => {
               if (child.isMesh) {
-                // console.log(child)
+                console.log(child)
                 child.material = child.material.clone();
                 const color = getColorByHeight(
                   geoJson.features[buildingId].properties.height
                 );
-                // console.log(color);
+                console.log(color);
                 child.material.color.set(color);
                 child.userData.isBuilding = true;
                 child.userData.buildingId = buildingId;
@@ -304,7 +295,7 @@ const ModelViewer = ({
         )?.object;
 
         if (clickedMesh) {
-          // console.log("Clicked building:", clickedMesh);
+          console.log("Clicked building:", clickedMesh);
 
           // Highlight the clicked building
           clickedMesh.material.color.set(0xff0000); // Set to red
@@ -335,20 +326,20 @@ const ModelViewer = ({
           const length = boundingBox.max.x - boundingBox.min.x;
           const width = boundingBox.max.z - boundingBox.min.z;
 
-          const formattedDatetime = selectedDate3d.toISOString().split("T")[0];
+          const formattedDatetime = `${datetime}:00`;
           const payload = {
             height: clickedMesh.userData.height.toString(),
             length: length.toString(),
             breadth: width.toString(),
-            date: formattedDatetime,
+            date_time: formattedDatetime.replace("T", " "),
             latitude: clickedMesh.userData.latitude.toString(),
             longitude: clickedMesh.userData.longitude.toString(),
-            solar_irradiance: "270",
+            solar_irradiance: "0.4",
           };
-          console.log("payload",payload)
+
           try {
             const response = await axios.post(
-              "https://solaris-1.onrender.com/api/face_potential/",
+              "https://solaris-vd5p.onrender.com/api/solar_potential/",
               payload,
               {
                 headers: {
@@ -356,9 +347,7 @@ const ModelViewer = ({
                 },
               }
             );
-            setisVisible(true)
-            console.log("API Responsecvwsfv:", response.data);
-            setLabelData3d(response.data.hourly_potential)
+            console.log("API Response:", response.data);
           } catch (error) {
             console.error("Error calling API:", error);
           }
@@ -425,11 +414,8 @@ const ModelViewer = ({
   //     console.error("Error fetching sun position:", error);
   //   }
   // };
-const handleDatetimeSubmit=()=>{
 
-}
   return (
-    <>
     <div className="flex bg-gray-200 h-screen overflow-hidden">
       {/* Add the legend image */}
       <img
@@ -445,27 +431,9 @@ const handleDatetimeSubmit=()=>{
       />
 
       <div className=" absolute right-10 top-8">
-      <InputSelection
-            selectedDate={selectedDate3d}
-            setSelectedDate={setSelectedDate3d}
-           
-
-          />
+        <InputSelection/>
       </div>
-
-      {/* Drop Down */}
-      {labelData3d && (
-        <div className="absolute bottom-0 w-[80%]">
-          <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
-        <DropDown3dViewer 
-        selectedDropdown3d={selectedDropdown3d } setSelectedDropdown3d={setSelectedDropdown3d}
-        labelData3d={labelData3d} dropdownVisible3d={dropdownVisible3d} setDropdownVisible3d={setDropdownVisible3d}/>
-          </SlideInComponent>
-        </div>
-      )}
     </div>
-
-    </>
   );
 };
 

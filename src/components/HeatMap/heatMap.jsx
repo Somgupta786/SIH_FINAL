@@ -1,17 +1,18 @@
 "use client";
-
+//Rishi
 import React, { useEffect, useState, useRef } from "react";
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import TWEEN from "@tweenjs/tween.js";
+import InputSelection from "../Dashboard/input-slider/page";
 
 import axios from "axios";
 
 const ModelViewer = ({
-  shadowOpacity = 0.5,
-  shadowResolution = 2048,
+  shadowOpacity = 0.9,
+  shadowResolution = 4096,
   lightIntensity = 1,
   modelScale = 10,
   modelPath = "/models/",
@@ -110,7 +111,7 @@ const ModelViewer = ({
     );
     scene.add(arrowHelper2);
 
-    const groundSize = 1000;
+    const groundSize =750;
     // Load grass texture
     const textureLoader = new THREE.TextureLoader();
     const grassTexture = textureLoader.load("/try.webp");
@@ -121,7 +122,7 @@ const ModelViewer = ({
     const groundMaterial = new THREE.MeshStandardMaterial({
       map: grassTexture,
     });
-    const groundGeometry = new THREE.PlaneGeometry(groundSize, 1600);
+    const groundGeometry = new THREE.PlaneGeometry(groundSize, 1300);
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = 0;
@@ -146,10 +147,24 @@ const ModelViewer = ({
             let buildingId = 0;
             object.children.forEach((child) => {
               if (child.isMesh) {
-              
-               
+                console.log(child)
+                // child.material = child.material.clone();
+                // const color = getColorByHeight(
+                //   geoJson.features[buildingId].properties.height
+                // );
+                // console.log(color);
+                // child.material.color.set(color);
+                child.userData.isBuilding = true;
+                child.userData.buildingId = buildingId;
+                child.castShadow = true;
+                child.userData.latitude =
+                  geoJson.features[buildingId].properties.latitude;
+                child.userData.height =
+                  geoJson.features[buildingId].properties.height;
+                child.userData.longitude =
+                  geoJson.features[buildingId++].properties.longitude;
 
-                const buildingScaleFactor = 0.3;
+                const buildingScaleFactor = 0.25;
                 child.scale.set(
                   buildingScaleFactor,
                   buildingScaleFactor,
@@ -239,18 +254,18 @@ const ModelViewer = ({
       );
       const intersects = raycaster.intersectObjects(scene.children, true);
 
-      // Highlight intersected objects
-      scene.children.forEach((child) => {
-        if (child.isMesh && child.userData.isBuilding) {
-          child.material.emissive.setHex(0x000000); // Reset color
-        }
-      });
+      // // Highlight intersected objects
+      // scene.children.forEach((child) => {
+      //   if (child.isMesh && child.userData.isBuilding) {
+      //     child.material.emissive.setHex(0x000000); // Reset color
+      //   }
+      // });
 
-      intersects.forEach((intersect) => {
-        if (intersect.object.userData.isBuilding) {
-          intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
-        }
-      });
+      // intersects.forEach((intersect) => {
+      //   if (intersect.object.userData.isBuilding) {
+      //     intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
+      //   }
+      // });
     };
 
     const animate = () => {
@@ -281,8 +296,8 @@ const ModelViewer = ({
         if (clickedMesh) {
           console.log("Clicked building:", clickedMesh);
 
-          // Highlight the clicked building
-          clickedMesh.material.color.set(0xff0000); // Set to red
+          // // Highlight the clicked building
+          // clickedMesh.material.color.set(0xff0000); // Set to red
 
           // Add ripple effect at the click position
           const ripple = document.createElement("div");
@@ -292,7 +307,7 @@ const ModelViewer = ({
           ripple.style.borderRadius = "50%";
           ripple.style.background = "rgba(0, 128, 255, 0.5)";
           ripple.style.left = `${event.clientX - 50}px`;
-          ripple.style.top = `${event.clientY - 50}px`;
+          ripple.style.top = ${event.clientY - 50}px;
           ripple.style.pointerEvents = "none";
           ripple.style.animation = "rippleEffect 1s ease-out";
           document.body.appendChild(ripple);
@@ -309,7 +324,7 @@ const ModelViewer = ({
           const length = boundingBox.max.x - boundingBox.min.x;
           const width = boundingBox.max.z - boundingBox.min.z;
 
-          const formattedDatetime = `${datetime}:00`;
+          const formattedDatetime = ${datetime}:00;
           const payload = {
             height: clickedMesh.userData.height.toString(),
             length: length.toString(),
@@ -365,7 +380,7 @@ const ModelViewer = ({
   ]);
   const handleDatetimeSubmit = async () => {
     try {
-      const formattedDatetime = `${datetime}:00`;
+      const formattedDatetime = ${datetime}:00;
       console.log("datetime", formattedDatetime.replace("T", " "));
       const response = await fetch(
         "https://solaris-1.onrender.com/api/sun_position/",
@@ -381,7 +396,7 @@ const ModelViewer = ({
       );
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+        throw new Error(Error: ${response.status} ${response.statusText});
       }
 
       const data = await response.json();
@@ -392,85 +407,22 @@ const ModelViewer = ({
   };
 
   return (
-    <div className="flex bg-gray-200 h-screen">
+    <div className="flex bg-gray-200 h-screen overflow-hidden">
       {/* Add the legend image */}
       <img
         src="/try.svg" // Update the path to your image
         alt="Building Height Legend"
-        className="absolute top-4 left-4 z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
+        className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
       />
-      <div className="absolute top-5 right-[34%] z-10 w-20 h-20 bg-white border border-gray-400 rounded-full shadow-lg flex items-center justify-center ">
-        {/* Compass Labels */}
-        <div className="absolute top-1 left-1/2 transform -translate-x-1/2 text-xs font-bold">
-          N
-        </div>
-        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-xs font-bold">
-          S
-        </div>
-        <div className="absolute left-1 top-1/2 transform -translate-y-1/2 text-xs font-bold">
-          W
-        </div>
-        <div className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs font-bold">
-          E
-        </div>
-
-        {/* Compass Needle */}
-        <img src="/compass.png"
-          className="absolute w-1 h-10 bg-black origin-bottom transform"
-          style={{ transform: `rotate(${needleRotation}deg)` }}
-        />
-      </div>
+      
       <div
         ref={mountRef}
         className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
-        style={{ overflow: "auto", height: "90vh" }}
+        style={{ overflow: "auto", height: "90vh" , width:"100%" }}
       />
-      <div className="p-4 space-y-6 w-1/3 bg-white border-l border-gray-300">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Time of Day
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="24"
-            step="0.1"
-            value={timeOfDay}
-            onChange={(e) => setTimeOfDay(Number(e.target.value))}
-            className="w-full"
-          />
-          <p className="text-sm text-gray-500">
-            Selected Time: {timeOfDay} hrs
-          </p>
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Select Date and Time
-          </label>
-          <input
-            type="datetime-local"
-            value={datetime}
-            onChange={(e) => setDatetime(e.target.value)}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            GHI Value
-          </label>
-          <input
-            type="number"
-            value={ghi}
-            onChange={(e) => setGhi(e.target.value)}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-        <button
-          onClick={handleDatetimeSubmit}
-          className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Submit
-        </button>
+
+      <div className=" absolute right-10 top-8">
+        <InputSelection/>
       </div>
     </div>
   );

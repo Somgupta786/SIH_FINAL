@@ -6,6 +6,7 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import TWEEN from "@tweenjs/tween.js";
+import InputSelection from "../Dashboard/input-slider/page";
 
 import axios from "axios";
 
@@ -405,40 +406,20 @@ const ModelViewer = ({
   };
 
   return (
-    <div className="flex bg-gray-200 h-screen">
+    <div className="flex bg-gray-200 h-screen overflow-hidden">
       {/* Add the legend image */}
       <img
         src="/try.svg" // Update the path to your image
         alt="Building Height Legend"
-        className="absolute top-4 left-4 z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
+        className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
       />
-      <div className="absolute top-5 right-[34%] z-10 w-20 h-20 bg-white border border-gray-400 rounded-full shadow-lg flex items-center justify-center ">
-        {/* Compass Labels */}
-        <div className="absolute top-1 left-1/2 transform -translate-x-1/2 text-xs font-bold">
-          N
-        </div>
-        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-xs font-bold">
-          S
-        </div>
-        <div className="absolute left-1 top-1/2 transform -translate-y-1/2 text-xs font-bold">
-          W
-        </div>
-        <div className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs font-bold">
-          E
-        </div>
-
-        {/* Compass Needle */}
-        <img src="/compass.png"
-          className="absolute w-1 h-10 bg-black origin-bottom transform"
-          style={{ transform: `rotate(${needleRotation}deg)` }}
-        />
-      </div>
+      
       <div
         ref={mountRef}
         className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
-        style={{ overflow: "auto", height: "90vh" }}
+        style={{ overflow: "auto", height: "90vh" , width:"100%" }}
       />
-      <div className="p-4 space-y-6 w-1/3 bg-white border-l border-gray-300">
+      {/* <div className="p-4 space-y-6 w-1/3 bg-white border-l border-gray-300">
        
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
@@ -468,6 +449,9 @@ const ModelViewer = ({
         >
           Submit
         </button>
+      </div> */}
+      <div className=" absolute right-10 top-8">
+        <InputSelection/>
       </div>
     </div>
   );

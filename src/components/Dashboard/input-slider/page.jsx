@@ -9,6 +9,8 @@ const InputSelection = ({
   selectedDate,
   setSelectedDate,
   onSubmit,
+  bipvValue=0.4,
+  setbipvValue
 }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -57,6 +59,13 @@ const InputSelection = ({
                 ? selectedDate.toLocaleDateString()
                 : "No date selected"}
             </p>
+            {/* <input
+            type="number"
+            onChange={(e)=>setbipvValue(e.target.value)}
+            placeholder="Enter GHI Value"
+            className="border border-black mt-2"
+            ></input>
+            <p>GIH Value: {bipvValue}</p> */}
           </div>
         ) : (
           <div className="max-w-[284px] mx-auto">

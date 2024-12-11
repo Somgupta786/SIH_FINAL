@@ -1,9 +1,9 @@
 import React from 'react'
-
+import ModelViewer from '@/components/ModelViewer/modelViewer'
 const page = () => {
   return (
     <div>
-        3D Viewer
+        <ModelViewer/>
     </div>
   )
 }

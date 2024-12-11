@@ -62,7 +62,7 @@ const ReportButton = ({ activeButton, setActiveButton, selectedRange, setSelecte
                 selectedRange === "Jan to July" ? "bg-backgroundYellow" : ""
               }`}
               onClick={() => {
-                setSelectedRange("Jan to July");
+                setSelectedRange("Jan to June");
                 setDropdownVisible(false);
               }}
             >
@@ -73,11 +73,11 @@ const ReportButton = ({ activeButton, setActiveButton, selectedRange, setSelecte
                 selectedRange === "Aug to Dec" ? "bg-backgroundYellow" : ""
               }`}
               onClick={() => {
-                setSelectedRange("Aug to Dec");
+                setSelectedRange("July to Dec");
                 setDropdownVisible(false);
               }}
             >
-              Aug to Dec
+              July to Dec
             </li>
           </ul>
         </div>

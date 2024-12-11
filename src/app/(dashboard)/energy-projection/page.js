@@ -11,10 +11,10 @@ import React,{useEffect, useState} from "react";
 
 const page = () => {
   const [graphActiveButton, setGraphActiveButton] = useState("monthly");
-  const [graphSelectedRange, setGraphSelectedRange] = useState("Jan to July");
+  const [graphSelectedRange, setGraphSelectedRange] = useState("Jan to June");
 
   const [energyActiveButton, setEnergyActiveButton] = useState("monthly");
-  const [energySelectedRange, setEnergySelectedRange] = useState("Jan to July");
+  const [energySelectedRange, setEnergySelectedRange] = useState("Jan to June");
 
   useEffect(()=>{
     console.log("graphActiveButton",graphActiveButton)
@@ -34,7 +34,7 @@ const page = () => {
         setSelectedRange={setGraphSelectedRange}
       />
       
-      {graphActiveButton === "monthly" ? <TotalPotentialGraph /> : <TotalPotentialGraphYearly />}
+      {graphActiveButton === "monthly" ? <TotalPotentialGraph graphSelectedRange={graphSelectedRange} /> : <TotalPotentialGraphYearly />}
 
       <ReportButton
         activeButton={energyActiveButton}

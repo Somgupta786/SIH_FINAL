@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 
-const SlideInComponent = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(true);
+const SlideInComponent = ({isOpen,setIsOpen, children }) => {
+  
 
   return (
     <div className="relative">
       {/* Toggle Button */}
       
       <button
-        className="w-full py-2 px-4 bg-gray-800 text-white rounded-lg focus:outline-none hover:bg-gray-700"
+        className="w-full py-2 px-4 bg-yellow-500 text-white rounded-lg focus:outline-none hover:bg-yellow-500"
         onClick={() => setIsOpen(!isOpen)}
       >
         Toggle Slide
@@ -23,7 +23,7 @@ const SlideInComponent = ({ children }) => {
         style={{ transform: isOpen ? "translateY(-100%)" : "translateY(100%)" }}
       >
       <button
-        className="w-full py-2 px-4 bg-gray-800 text-white rounded-lg focus:outline-none hover:bg-gray-700"
+        className="w-full py-2 px-4 bg-yellow-400 text-white rounded-lg focus:outline-none hover:bg-yellow-500"
         onClick={() => setIsOpen(!isOpen)}
       >
         Toggle Slide

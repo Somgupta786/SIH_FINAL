@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "../globals.css";
 import SideBar from "@/components/Common/SideBar";
 import "@fontsource/anek-malayalam"; // Defaults to regular weight
+import toast, { Toaster } from 'react-hot-toast';
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -28,7 +29,7 @@ export default function RootLayout({ children }) {
         <SideBar/>
         <div className="bg-white grow rounded-3xl pl-10 pr-8 py-10 overflow-y-scroll font-anek">{children}</div>
         </div>
-        
+        <Toaster />
       </body>
     </html>
   );

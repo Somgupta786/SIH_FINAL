@@ -12,6 +12,7 @@ import axios from "axios";
 import LineChart from "../Charts/LineChart";
 import LineChartDropDown from "./LineChartDropDown";
 import SlideInComponent from "../Common/SlideInComponent";
+import toast from "react-hot-toast";
 
 const ModelViewer = ({
   shadowOpacity = 0.9,
@@ -32,6 +33,10 @@ const ModelViewer = ({
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [labelData, setLabelData] = useState([]);
+
+  const [isOpen, setIsOpen] = useState(true);
+
+  const [bipvValue , setbipvValue] = useState(0.4)
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -338,10 +343,10 @@ const ModelViewer = ({
             date: formattedDatetime,
             latitude: clickedMesh.userData.latitude.toString(),
             longitude: clickedMesh.userData.longitude.toString(),
-            solar_irradiance: "0.4",
+            solar_irradiance: '0.4',
           };
           console.log("payload", payload);
-
+          toast.success("True");
           try {
             const response = await axios.post(
               "https://solaris-1.onrender.com/api/solar_potential/",
@@ -354,6 +359,7 @@ const ModelViewer = ({
             );
             console.log("API Response for graph:", response.data);
             setLabelData(response.data.rooftop_hourly_potential_kwh);
+            setIsOpen(true);
           } catch (error) {
             console.error("Error calling API:", error);
           }
@@ -437,18 +443,20 @@ const ModelViewer = ({
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             onSubmit={handleDatetimeSubmit}
+            bipvValue={bipvValue}
+            setbipvValue={setbipvValue}
           />
         </div>
       </div>
       {/* Line Chart */}
-      
+
       {labelData.length > 0 && (
-        <div className="absolute bottom-0 w-[80%]" >
-        <SlideInComponent> 
-      <LineChartDropDown labelData={labelData} />
-      </SlideInComponent>
+        <div className="absolute bottom-0 w-[80%]">
+          <SlideInComponent isOpen={isOpen} setIsOpen={setIsOpen}>
+            <LineChartDropDown labelData={labelData} />
+          </SlideInComponent>
         </div>
-      ) }
+      )}
     </>
   );
 };

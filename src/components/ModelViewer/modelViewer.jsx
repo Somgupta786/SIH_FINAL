@@ -11,13 +11,13 @@ import InputSelection from "../Dashboard/input-slider/page";
 import axios from "axios";
 
 const ModelViewer = ({
-  shadowOpacity = 0.5,
-  shadowResolution = 2048,
+  shadowOpacity = 0.9,
+  shadowResolution = 4096,
   lightIntensity = 1,
   modelScale = 10,
   modelPath = "/models/",
-  objFile = "eeshu.obj",
-  mtlFile = "eeshu.mtl",
+  objFile = "updated.obj",
+  mtlFile = "updated.mtl",
   geoJsonPath = "/models/eeshu_geo.geojson",
 }) => {
   const mountRef = useRef(null);
@@ -147,12 +147,13 @@ const ModelViewer = ({
             let buildingId = 0;
             object.children.forEach((child) => {
               if (child.isMesh) {
-                child.material = child.material.clone();
-                const color = getColorByHeight(
-                  geoJson.features[buildingId].properties.height
-                );
-                console.log(color);
-                child.material.color.set(color);
+                console.log(child)
+                // child.material = child.material.clone();
+                // const color = getColorByHeight(
+                //   geoJson.features[buildingId].properties.height
+                // );
+                // console.log(color);
+                // child.material.color.set(color);
                 child.userData.isBuilding = true;
                 child.userData.buildingId = buildingId;
                 child.castShadow = true;
@@ -253,18 +254,18 @@ const ModelViewer = ({
       );
       const intersects = raycaster.intersectObjects(scene.children, true);
 
-      // Highlight intersected objects
-      scene.children.forEach((child) => {
-        if (child.isMesh && child.userData.isBuilding) {
-          child.material.emissive.setHex(0x000000); // Reset color
-        }
-      });
+      // // Highlight intersected objects
+      // scene.children.forEach((child) => {
+      //   if (child.isMesh && child.userData.isBuilding) {
+      //     child.material.emissive.setHex(0x000000); // Reset color
+      //   }
+      // });
 
-      intersects.forEach((intersect) => {
-        if (intersect.object.userData.isBuilding) {
-          intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
-        }
-      });
+      // intersects.forEach((intersect) => {
+      //   if (intersect.object.userData.isBuilding) {
+      //     intersect.object.material.emissive.setHex(0xff0000); // Highlight in red
+      //   }
+      // });
     };
 
     const animate = () => {
@@ -295,8 +296,8 @@ const ModelViewer = ({
         if (clickedMesh) {
           console.log("Clicked building:", clickedMesh);
 
-          // Highlight the clicked building
-          clickedMesh.material.color.set(0xff0000); // Set to red
+          // // Highlight the clicked building
+          // clickedMesh.material.color.set(0xff0000); // Set to red
 
           // Add ripple effect at the click position
           const ripple = document.createElement("div");
@@ -419,37 +420,7 @@ const ModelViewer = ({
         className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
         style={{ overflow: "auto", height: "90vh" , width:"100%" }}
       />
-      {/* <div className="p-4 space-y-6 w-1/3 bg-white border-l border-gray-300">
-       
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Select Date and Time
-          </label>
-          <input
-            type="datetime-local"
-            value={datetime}
-            onChange={(e) => setDatetime(e.target.value)}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            GHI Value
-          </label>
-          <input
-            type="number"
-            value={ghi}
-            onChange={(e) => setGhi(e.target.value)}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-        <button
-          onClick={handleDatetimeSubmit}
-          className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Submit
-        </button>
-      </div> */}
+
       <div className=" absolute right-10 top-8">
         <InputSelection/>
       </div>

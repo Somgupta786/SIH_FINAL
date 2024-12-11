@@ -148,7 +148,7 @@ const ModelViewer = ({
       const loader = new THREE.FileLoader();
       loader.load(geoJsonPath, (geoJsonData) => {
         const geoJson = JSON.parse(geoJsonData);
-        console.log(geoJson.features);
+        // console.log(geoJson.features);
         const objLoader = new OBJLoader();
         objLoader.setMaterials(materials);
         objLoader.setPath(modelPath);
@@ -403,7 +403,7 @@ const ModelViewer = ({
   const handleDatetimeSubmit = async () => {
     try {
       const formattedDatetime = `${datetime}:00`;
-      console.log("datetime", formattedDatetime.replace("T", " "));
+      // console.log("datetime", formattedDatetime.replace("T", " "));
       const response = await fetch(
         "https://solaris-1.onrender.com/api/sun_position/",
         {

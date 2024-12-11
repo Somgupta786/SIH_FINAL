@@ -23,9 +23,11 @@ const ModelViewer = ({
   const mountRef = useRef(null);
   const [timeOfDay, setTimeOfDay] = useState(5.5);
   const [datetime, setDatetime] = useState("2024-10-26T11:28");
-  const [sunPosition, setSunPosition] = useState({ x: 180, y: 90, z: 360 });
+  const [sunPosition, setSunPosition] = useState({ x: 180, y: 180, z:90 });
   const [ghi, setGhi] = useState("");
   const [needleRotation, setNeedleRotation] = useState(0);
+  const compassRef = useRef(null);
+  const [selectedShadowViewer,setSelectedShadowViewer] = useState(new Date())
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -75,11 +77,24 @@ const ModelViewer = ({
     directionalLight.shadow.camera.far = 500;
 
     scene.add(directionalLight);
+    // Compass Function
+    const updateCompassRotation = () => {
+      const vector = new THREE.Vector3(0, 0, -1);
+      vector.applyQuaternion(camera.quaternion); // Rotate vector based on camera orientation
+      const angle = Math.atan2(vector.x, vector.z); // Calculate rotation angle
+      const degree = (angle * (180 / Math.PI) + 360) % 360; // Convert to degrees
+
+      // Rotate the compass
+      if (compassRef.current) {
+        compassRef.current.style.transform = `rotate(${degree}deg)`;
+      }
+    };
     // Track changes in camera orientation and update compass needle
     controls.addEventListener("change", () => {
       // Calculate compass needle rotation (Y-axis rotation of the camera)
       const rotationY = Math.atan2(camera.position.x, camera.position.z);
       setNeedleRotation(-rotationY * (180 / Math.PI)); // Convert radians to degrees
+      updateCompassRotation() // calling the compass
     });
 
     // 🌞 Create the Sun model
@@ -137,7 +152,7 @@ const ModelViewer = ({
       const loader = new THREE.FileLoader();
       loader.load(geoJsonPath, (geoJsonData) => {
         const geoJson = JSON.parse(geoJsonData);
-        console.log(geoJson.features);
+        // console.log(geoJson.features);
         const objLoader = new OBJLoader();
         objLoader.setMaterials(materials);
         objLoader.setPath(modelPath);
@@ -147,13 +162,13 @@ const ModelViewer = ({
             let buildingId = 0;
             object.children.forEach((child) => {
               if (child.isMesh) {
-                console.log(child)
+                // console.log(child)
                 child.material = child.material.clone();
                 const color = getColorByHeight(
                   geoJson.features[buildingId].properties.height
                 );
-                console.log(color);
-                child.material.color.set(color);
+                // console.log(color);
+                child.material.color.set(0xffffff);
                 child.userData.isBuilding = true;
                 child.userData.buildingId = buildingId;
                 child.castShadow = true;
@@ -212,6 +227,7 @@ const ModelViewer = ({
     const mouse = new THREE.Vector2();
 
     const updateSunPosition = () => {
+      
       const angle = (timeOfDay / 24) * Math.PI * 2;
       const sunX = Math.cos(angle) * 150;
       const sunY = Math.max(Math.sin(angle) * 150, 10);
@@ -226,6 +242,7 @@ const ModelViewer = ({
       directionalLight.target.updateMatrixWorld();
 
       // Update ArrowHelper to point in the new direction
+      console.log(directionalLight.position)
       arrowHelper.position.copy(directionalLight.position);
       sun.position.copy(directionalLight.position);
       arrowHelper.setDirection(
@@ -295,7 +312,7 @@ const ModelViewer = ({
         )?.object;
 
         if (clickedMesh) {
-          console.log("Clicked building:", clickedMesh);
+          // console.log("Clicked building:", clickedMesh);
 
           // Highlight the clicked building
           clickedMesh.material.color.set(0xff0000); // Set to red
@@ -387,36 +404,71 @@ const ModelViewer = ({
     sunPosition,
   ]);
 
-  // const handleDatetimeSubmit = async () => {
-  //   try {
-  //     const formattedDatetime = `${datetime}:00`;
-  //     console.log("datetime", formattedDatetime.replace("T", " "));
-  //     const response = await fetch(
-  //       "https://solaris-1.onrender.com/api/sun_position/",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           datetime: formattedDatetime.replace("T", " "), // Convert to required format
-  //         }),
-  //       }
-  //     );
+  const handleDatetimeSubmit = async () => {
+    try {
 
-  //     if (!response.ok) {
-  //       throw new Error(`Error: ${response.status} ${response.statusText}`);
-  //     }
+      const dateTime = convertDateToCustomFormat(selectedShadowViewer)
 
-  //     const data = await response.json();
-  //     setSunPosition(data); // Update the sun position
-  //   } catch (error) {
-  //     console.error("Error fetching sun position:", error);
-  //   }
-  // };
+      
+      const response = await fetch(
+        "https://solaris-1.onrender.com/api/sun_position/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            datetime: dateTime, // Convert to required format
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("data sum pos",data)
+      // Update the sun position
+     setSunPosition({
+      x:data.x,y:data.y,z:data.z
+     });
+    console.log("sunPosition",sunPosition)
+    
+    } catch (error) {
+      console.error("Error fetching sun position:", error);
+    }
+  };
+
+  const convertDateToCustomFormat = (dateString) => {
+    const date = new Date(dateString);
+  
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
 
   return (
     <div className="flex bg-gray-200 h-screen overflow-hidden">
+     <div
+        ref={compassRef} // Compass reference
+        style={{
+          position:"absolute",
+          right:"30px",
+          top:"25px",
+          width: '150px',
+          height: '150px',
+          background: 'url("/compass.png") no-repeat center center',
+          backgroundSize: 'contain',
+          transformOrigin: 'center', // Rotate from center
+          zIndex:'100'
+        }}
+      ></div>
       {/* Add the legend image */}
       <img
         src="/try.svg" // Update the path to your image
@@ -430,8 +482,13 @@ const ModelViewer = ({
         style={{ overflow: "auto", height: "90vh" , width:"100%" }}
       />
 
-      <div className=" absolute right-10 top-8">
-        <InputSelection/>
+      <div className=" absolute right-10 top-40">
+        <InputSelection
+         selectedDate={selectedShadowViewer}
+         setSelectedDate={setSelectedShadowViewer}
+          datePicker={false}
+          onSubmit={handleDatetimeSubmit}
+        />
       </div>
     </div>
   );

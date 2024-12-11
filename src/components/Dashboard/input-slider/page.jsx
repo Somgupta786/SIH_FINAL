@@ -33,7 +33,7 @@ const InputSelection = ({
       <div
         className={`absolute bg-white flex flex-col rounded-l-xl p-3 border border-black/80 shadow-2xl w-[22.5rem] mx-auto top-16 -right-8 z-10 transition-all duration-700 overflow-hidden ${
           dropdownVisible
-            ? "max-h-[45rem] min-h-80 opacity-100"
+            ? "max-h-[45rem] opacity-100"
             : "max-h-0 opacity-0"
         }`}
       >
@@ -91,11 +91,9 @@ const InputSelection = ({
       </p>
     </div>
         )}
-
-
         {
           !datePicker&&
-          <button className="mx-auto mt-20 py-2 bg-backgroundGreen hover:bg-backgroundGreen/90 w-full text-white text-lg rounded-xl" 
+          <button className="mx-auto float-end mt-10 py-2 bg-backgroundGreen hover:bg-backgroundGreen/90 w-full text-white text-lg rounded-xl" 
         onClick={onSubmit}
         > Submit</button>
         }

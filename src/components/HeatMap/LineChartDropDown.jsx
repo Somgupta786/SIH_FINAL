@@ -1,7 +1,7 @@
 import React from 'react'
 import LineChart from '../Charts/LineChart';
 
-const LineChartDropDown = ({labelData}) => {
+const LineChartDropDown = ({labelData,label="Rooftop PV",title="Rooftop Hourly potential (in kwh)",yAxisLabel="Rooftop Hourly potential (in kwh)"}) => {
     const yearlyData = {
         labels: [
             "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", 
@@ -9,7 +9,7 @@ const LineChartDropDown = ({labelData}) => {
           ],
         datasets: [
           {
-            label: "Rooftop PV",
+            label: label,
             data: labelData,
             borderColor: "#FFD682",
             backgroundColor: "rgba(255, 255, 255, 0.1)",
@@ -22,9 +22,9 @@ const LineChartDropDown = ({labelData}) => {
   return (
     <LineChart
         data={yearlyData}
-        name="Rooftop Hourly potential (in kwh)"
+        name={title}
         xAxisLabel="Time"
-        yAxisLabel="Rooftop Hourly potential (in kwh)"
+        yAxisLabel={yAxisLabel}
       />
   )
 }

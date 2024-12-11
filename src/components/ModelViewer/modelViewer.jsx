@@ -34,6 +34,7 @@ const ModelViewer = ({
   const [dropdownVisible3d,setDropdownVisible3d] = useState(1)
   const [selectedDropdown3d,setSelectedDropdown3d] = useState('face1')
   const [isVisible, setisVisible]=useState(false)
+  // const [ avg]
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -356,7 +357,7 @@ const ModelViewer = ({
               }
             );
             setisVisible(true)
-            console.log("API Responsecvwsfv:", response.data.hourly_potential);
+            console.log("API Responsecvwsfv:", response.data);
             setLabelData3d(response.data.hourly_potential)
           } catch (error) {
             console.error("Error calling API:", error);
@@ -424,7 +425,9 @@ const ModelViewer = ({
   //     console.error("Error fetching sun position:", error);
   //   }
   // };
+const handleDatetimeSubmit=()=>{
 
+}
   return (
     <>
     <div className="flex bg-gray-200 h-screen overflow-hidden">

@@ -1,8 +1,14 @@
-import LineChartDropDown from '@/components/HeatMap/LineChartDropDown';
-import React from 'react';
+import LineChartDropDown from "@/components/HeatMap/LineChartDropDown";
+import React from "react";
 import { MdArrowDropDown } from "react-icons/md";
 
-const DropDown3dViewer = ({ dropdownVisible3d, setDropdownVisible3d, labelData3d, selectedDropdown3d, setSelectedDropdown3d }) => {
+const DropDown3dViewer = ({
+  dropdownVisible3d,
+  setDropdownVisible3d,
+  labelData3d,
+  selectedDropdown3d,
+  setSelectedDropdown3d,
+}) => {
   const faceOptions = Object.keys(labelData3d); // Get the keys dynamically (e.g., face1, face2, face3, face4)
 
   return (
@@ -25,7 +31,9 @@ const DropDown3dViewer = ({ dropdownVisible3d, setDropdownVisible3d, labelData3d
       {/* Dropdown Content */}
       <div
         className={`absolute right-0 top-14 bg-white rounded-xl border border-black/40 shadow-lg w-fit transition-all duration-700 overflow-hidden ${
-          dropdownVisible3d ? "max-h-[15rem] p-3 mt-2 opacity-100" : "max-h-0 opacity-0"
+          dropdownVisible3d
+            ? "max-h-[15rem] p-3 mt-2 opacity-100"
+            : "max-h-0 opacity-0"
         }`}
       >
         {faceOptions.map((face, index) => (
@@ -49,7 +57,12 @@ const DropDown3dViewer = ({ dropdownVisible3d, setDropdownVisible3d, labelData3d
       {/* Line Chart for Selected Face */}
       {selectedDropdown3d && (
         <div className="mt-4">
-          <LineChartDropDown labelData={labelData3d[selectedDropdown3d]} />
+          <LineChartDropDown
+            labelData={labelData3d[selectedDropdown3d]}
+            label="BIPV Potential"
+            title="BIPV Potential for Each Face in During the whole Day Time"
+            yAxisLabel="BIPV Potential for Each Face (in kwh)"
+          />
         </div>
       )}
     </div>

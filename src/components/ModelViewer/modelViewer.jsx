@@ -445,7 +445,7 @@ const ModelViewer = ({
       <InputSelection
             selectedDate={selectedDate3d}
             setSelectedDate={setSelectedDate3d}
-            onSubmit={handleDatetimeSubmit}
+           
 
           />
       </div>

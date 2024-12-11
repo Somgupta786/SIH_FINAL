@@ -54,7 +54,7 @@ const PieChart = ({ dataset }) => {
   return (
     <div className="relative flex flex-col p-5 gap-3 my-5 justify-center items-center border border-backgroundGreen rounded-lg">
       <p className="font-medium mb-4">{dataset.title || "Pie Chart"}</p>
-      <div className="flex justify-center items-center gap-4">
+      <div className="flex justify-center flex-wrap items-center gap-4">
         {dataset.labels.map((label, index) => (
           <div className="flex items-center gap-2" key={index}>
             <div

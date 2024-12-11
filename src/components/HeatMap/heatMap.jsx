@@ -26,7 +26,7 @@ const ModelViewer = ({
   const mountRef = useRef(null);
   const [timeOfDay, setTimeOfDay] = useState(5.5);
   const [datetime, setDatetime] = useState("2024-10-26T11:28");
-  const [sunPosition, setSunPosition] = useState({ x: 90, y: 90, z: 180 });
+  const [sunPosition, setSunPosition] = useState({ x: 90, y: 90, z: 90 });
   const [ghi, setGhi] = useState("");
   const [needleRotation, setNeedleRotation] = useState(0);
 

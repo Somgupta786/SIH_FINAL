@@ -23,7 +23,7 @@ const ModelViewer = ({
   const mountRef = useRef(null);
   const [timeOfDay, setTimeOfDay] = useState(5.5);
   const [datetime, setDatetime] = useState("2024-10-26T11:28");
-  const [sunPosition, setSunPosition] = useState({ x: 90, y: 90, z: 180 });
+  const [sunPosition, setSunPosition] = useState({ x: 180, y: 360, z: 360 });
   const [ghi, setGhi] = useState("");
   const [needleRotation, setNeedleRotation] = useState(0);
 
@@ -83,7 +83,7 @@ const ModelViewer = ({
     });
 
     // 🌞 Create the Sun model
-    const sunRadius = 10; // Size of the Sun
+    const sunRadius = 40; // Size of the Sun
     const sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
     const sunMaterial = new THREE.MeshStandardMaterial({
       emissive: 0xcb8c45,
@@ -99,14 +99,14 @@ const ModelViewer = ({
     const arrowHelper = new THREE.ArrowHelper(
       lightDirection,
       directionalLight.position,
-      50,
+      250,
       0xc4a948 // Red color
     );
     scene.add(arrowHelper);
     const arrowHelper2 = new THREE.ArrowHelper(
       lightDirection,
       directionalLight.position,
-      50,
+      250,
       0xc4a948 // Red color
     );
     scene.add(arrowHelper2);
@@ -172,9 +172,9 @@ const ModelViewer = ({
                 );
 
                 scene.add(child);
-                // // Calculate the height of the building by getting its bounding box
-                // const boundingBox = new THREE.Box3().setFromObject(child);
-                // const height = boundingBox.max.y - boundingBox.min.y;
+                // Calculate the height of the building by getting its bounding box
+                const boundingBox = new THREE.Box3().setFromObject(child);
+                const height = boundingBox.max.y - boundingBox.min.y;
               }
             });
 
@@ -299,6 +299,7 @@ const ModelViewer = ({
           // Highlight the clicked building
           clickedMesh.material.color.set(0xff0000); // Set to red
 
+
           // Add ripple effect at the click position
           const ripple = document.createElement("div");
           ripple.style.position = "absolute";
@@ -367,8 +368,12 @@ const ModelViewer = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
+
       if(mountRef.current){
-      mountRef.current.removeChild(renderer.domElement);}
+      
+
+      // mountRef.current.removeChild(renderer.domElement);
+
       window.removeEventListener("resize", handleResize);
     };
   }, [
@@ -379,33 +384,33 @@ const ModelViewer = ({
     modelScale,
     sunPosition,
   ]);
-  const handleDatetimeSubmit = async () => {
-    try {
-      const formattedDatetime = `${datetime}:00`;
-      console.log("datetime", formattedDatetime.replace("T", " "));
-      const response = await fetch(
-        "https://solaris-1.onrender.com/api/sun_position/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            datetime: formattedDatetime.replace("T", " "), // Convert to required format
-          }),
-        }
-      );
+  // const handleDatetimeSubmit = async () => {
+  //   try {
+  //     const formattedDatetime = `${datetime}:00`;
+  //     console.log("datetime", formattedDatetime.replace("T", " "));
+  //     const response = await fetch(
+  //       "https://solaris-1.onrender.com/api/sun_position/",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           datetime: formattedDatetime.replace("T", " "), // Convert to required format
+  //         }),
+  //       }
+  //     );
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`Error: ${response.status} ${response.statusText}`);
+  //     }
 
-      const data = await response.json();
-      setSunPosition(data); // Update the sun position
-    } catch (error) {
-      console.error("Error fetching sun position:", error);
-    }
-  };
+  //     const data = await response.json();
+  //     setSunPosition(data); // Update the sun position
+  //   } catch (error) {
+  //     console.error("Error fetching sun position:", error);
+  //   }
+  // };
 
   return (
     <div className="flex bg-gray-200 h-screen overflow-hidden">

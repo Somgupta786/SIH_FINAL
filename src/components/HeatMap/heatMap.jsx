@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import TWEEN from "@tweenjs/tween.js";
+
 import InputSelection from "../Dashboard/input-slider/page";
 
 import axios from "axios";
@@ -153,7 +153,13 @@ const ModelViewer = ({
             let buildingId = 0;
             object.children.forEach((child) => {
               if (child.isMesh) {
-                console.log(child);
+
+
+                // if(child.name=="21.007"){console.log(child)
+                //   child.material[2].color.set(0x000000);
+                // }
+                
+
                 // child.material = child.material.clone();
                 // const color = getColorByHeight(
                 //   geoJson.features[buildingId].properties.height

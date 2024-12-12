@@ -217,7 +217,7 @@ const ModelViewer = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      mountRef.current.removeChild(renderer.domElement);
+    //   mountRef.current.removeChild(renderer.domElement);
       window.removeEventListener("resize", handleResize);
     };
   }, [timeOfDay, shadowOpacity, shadowResolution, lightIntensity, modelScale,sunPosition]);
@@ -250,7 +250,7 @@ const ModelViewer = ({
   };
 
   return (
-    <div className="flex bg-gray-200">
+    <div className="flex flex-col ">
       <div
         ref={mountRef}
         style={{

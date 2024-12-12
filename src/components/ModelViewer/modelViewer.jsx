@@ -107,7 +107,7 @@ const ModelViewer = ({
       // Calculate compass needle rotation (Y-axis rotation of the camera)
       const rotationY = Math.atan2(camera.position.x, camera.position.z);
       setNeedleRotation(-rotationY * (180 / Math.PI)); // Convert radians to degrees
-      updateCompassRotation()
+      updateCompassRotation();
     });
 
     // 🌞 Create the Sun model
@@ -363,7 +363,7 @@ const ModelViewer = ({
             date: formattedDatetime,
             latitude: clickedMesh.userData.latitude.toString(),
             longitude: clickedMesh.userData.longitude.toString(),
-            solar_irradiance: ghi*50,
+            solar_irradiance: ghi * 50,
           };
           console.log("payload", payload);
           try {
@@ -472,19 +472,19 @@ const ModelViewer = ({
           className="absolute top-10 left-[265px] z-10 w-24 h-36 bg-white border-2 border-black   rounded shadow-md"
         />
         <div
-        ref={compassRef} // Compass reference
-        style={{
-          position:"absolute",
-          right:"30px",
-          top:"25px",
-          width: '150px',
-          height: '150px',
-          background: 'url("/compass.png") no-repeat center center',
-          backgroundSize: 'contain',
-          transformOrigin: 'center', // Rotate from center
-          zIndex:'100'
-        }}
-      ></div>
+          ref={compassRef} // Compass reference
+          style={{
+            position: "absolute",
+            right: "30px",
+            top: "25px",
+            width: "150px",
+            height: "150px",
+            background: 'url("/compass.png") no-repeat center center',
+            backgroundSize: "contain",
+            transformOrigin: "center", // Rotate from center
+            zIndex: "100",
+          }}
+        ></div>
 
         <div
           ref={mountRef}
@@ -507,16 +507,20 @@ const ModelViewer = ({
             <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
               <div className="flex flex-row-reverse">
                 <div className="w-full">
-                <div className="flex flex-col gap-2 w-full items-center text-cente mt-2">
-                <p className="text-xl w-fit border bg-backgroundGreen text-white px-4 rounded-lg font-medium mt-2 mx-auto" >Face {selectedDropdown3d}
+                  <div className="flex flex-col gap-2 w-full items-center text-cente mt-2 pr-40">
+                    <p className="text-xl w-fit border bg-backgroundGreen text-white px-4 py-2 rounded-lg font-medium mt-2  mx-auto">
+                      Face {selectedDropdown3d} 🧭 {selectedDropdown3d === 1 && "East"}
+                      {selectedDropdown3d === 2 && "South"}
+                      {selectedDropdown3d === 3 && "West"}
+                      {selectedDropdown3d === 4 && "North"}
+                    </p>
 
-                </p>
-                {
-                ghi && <p>GHI: {ghi} kW/m <sup>2</sup> </p>
-
-                }
-                
-                </div>
+                    {ghi && (
+                      <p>
+                        GHI: {ghi} kW/m <sup>2</sup>{" "}
+                      </p>
+                    )}
+                  </div>
                   <DropDown3dViewer
                     selectedDropdown3d={selectedDropdown3d}
                     setSelectedDropdown3d={setSelectedDropdown3d}
@@ -524,26 +528,26 @@ const ModelViewer = ({
                     dropdownVisible3d={dropdownVisible3d}
                     setDropdownVisible3d={setDropdownVisible3d}
                   />
-                  <div className="flex justify-around w-full text-lg font-medium mb-2" >
-                  <p className="">
-                    Average Potential :{" "}
-                    {
-                      completeData?.average_potential[
-                        `face${selectedDropdown3d}`
-                      ]
-                    }{" "}
-                    kwh
-                  </p>
+                  <div className="flex justify-around w-full text-lg font-medium mb-2">
+                    <p className="">
+                      Average Potential :{" "}
+                      {
+                        completeData?.average_potential[
+                          `face${selectedDropdown3d}`
+                        ]
+                      }{" "}
+                      kwh
+                    </p>
 
-                  <div>
-                    {completeData?.non_zero_periods[
-                      `face${selectedDropdown3d}`
-                    ]?.map((period, index) => (
-                      <p key={index}>
-                        Start: {period.start}, End: {period.end}
-                      </p>
-                    )) || <p>No periods available</p>}
-                  </div>
+                    <div>
+                      {completeData?.non_zero_periods[
+                        `face${selectedDropdown3d}`
+                      ]?.map((period, index) => (
+                        <p key={index}>
+                          Start: {period.start}, End: {period.end}
+                        </p>
+                      )) || <p>No periods available</p>}
+                    </div>
                   </div>
                 </div>
                 {selectedBuilding && (

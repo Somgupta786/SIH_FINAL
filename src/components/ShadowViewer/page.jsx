@@ -227,7 +227,7 @@ const ModelViewer = ({
     const mouse = new THREE.Vector2();
 
     const updateSunPosition = () => {
-      
+      console.log(sunPosition)
       const angle = (timeOfDay / 24) * Math.PI * 2;
       const sunX = Math.cos(angle) * 150;
       const sunY = Math.max(Math.sin(angle) * 150, 10);
@@ -241,8 +241,7 @@ const ModelViewer = ({
       );
       directionalLight.target.updateMatrixWorld();
 
-      // Update ArrowHelper to point in the new direction
-      console.log(directionalLight.position)
+      
       arrowHelper.position.copy(directionalLight.position);
       sun.position.copy(directionalLight.position);
       arrowHelper.setDirection(
@@ -430,9 +429,7 @@ const ModelViewer = ({
       const data = await response.json();
       console.log("data sum pos",data)
       // Update the sun position
-     setSunPosition({
-      x:data.x,y:data.y,z:data.z
-     });
+     setSunPosition((prev)=>data);
     console.log("sunPosition",sunPosition)
     
     } catch (error) {

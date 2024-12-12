@@ -31,9 +31,13 @@ const ModelViewer = ({
   const [selectedDate3d, setSelectedDate3d] = useState(new Date());
   const [labelData3d, setLabelData3d] = useState([]);
 
-  const [dropdownVisible3d,setDropdownVisible3d] = useState(1)
-  const [selectedDropdown3d,setSelectedDropdown3d] = useState('face1')
-  const [isVisible, setisVisible]=useState(false)
+  const [dropdownVisible3d, setDropdownVisible3d] = useState(1);
+  const [selectedDropdown3d, setSelectedDropdown3d] = useState("face1");
+  const [isVisible, setisVisible] = useState(false);
+
+  const [selectedBuilding, setSelectedBuilding] = useState(null);
+
+  const [rgbColor, setRgbColor] = useState([]);
   // const [ avg]
 
   useEffect(() => {
@@ -120,7 +124,7 @@ const ModelViewer = ({
     );
     scene.add(arrowHelper2);
 
-    const groundSize =750;
+    const groundSize = 750;
     // Load grass texture
     const textureLoader = new THREE.TextureLoader();
     const grassTexture = textureLoader.load("/try.webp");
@@ -304,11 +308,11 @@ const ModelViewer = ({
         )?.object;
 
         if (clickedMesh) {
-          // console.log("Clicked building:", clickedMesh);
+          console.log("Clicked building:", clickedMesh);
+          setSelectedBuilding(clickedMesh.userData);
 
           // Highlight the clicked building
           clickedMesh.material.color.set(0xff0000); // Set to red
-
 
           // Add ripple effect at the click position
           const ripple = document.createElement("div");
@@ -334,7 +338,8 @@ const ModelViewer = ({
           // API Call
           const length = boundingBox.max.x - boundingBox.min.x;
           const width = boundingBox.max.z - boundingBox.min.z;
-
+          clickedMesh.userData.length = length;
+          clickedMesh.userData.breadth = width;
           const formattedDatetime = selectedDate3d.toISOString().split("T")[0];
           const payload = {
             height: clickedMesh.userData.height.toString(),
@@ -345,7 +350,7 @@ const ModelViewer = ({
             longitude: clickedMesh.userData.longitude.toString(),
             solar_irradiance: "270",
           };
-          console.log("payload",payload)
+          console.log("payload", payload);
           try {
             const response = await axios.post(
               "https://solaris-1.onrender.com/api/face_potential/",
@@ -356,12 +361,27 @@ const ModelViewer = ({
                 },
               }
             );
-            setisVisible(true)
+            setisVisible(true);
             console.log("API Responsecvwsfv:", response.data);
-            setLabelData3d(response.data.hourly_potential)
+            setLabelData3d(response.data.hourly_potential);
           } catch (error) {
             console.error("Error calling API:", error);
           }
+          try {
+            const result = await axios.post(
+              "https://solaris-1.onrender.com/api/face_colors/",
+              payload,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            console.log("result heat", result.data.face1_colors.flat()[0]);
+            const color = result.data.face1_colors.flat()
+            console.log(color)
+            setRgbColor[(prev)=>color];
+          } catch (err) {}
         }
       }
     };
@@ -380,13 +400,10 @@ const ModelViewer = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
+      if (mountRef.current) {
+        // mountRef.current.removeChild(renderer.domElement);
 
-      if(mountRef.current){
-      
-
-      // mountRef.current.removeChild(renderer.domElement);
-
-      window.removeEventListener("resize", handleResize);
+        window.removeEventListener("resize", handleResize);
       }
     };
   }, [
@@ -425,46 +442,83 @@ const ModelViewer = ({
   //     console.error("Error fetching sun position:", error);
   //   }
   // };
-const handleDatetimeSubmit=()=>{
-
-}
+  const handleDatetimeSubmit = () => {};
+  useEffect(() => {
+    console.log("rgbColor", rgbColor[0]);
+  }, [rgbColor]);
+  const scaleFactor = 30;
   return (
     <>
-    <div className="flex bg-gray-200 h-screen overflow-hidden">
-      {/* Add the legend image */}
-      <img
-        src="/try.svg" // Update the path to your image
-        alt="Building Height Legend"
-        className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
-      />
-      
-      <div
-        ref={mountRef}
-        className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
-        style={{ overflow: "auto", height: "90vh" , width:"100%" }}
-      />
+      <div className="flex bg-gray-200 h-screen overflow-hidden">
+        {/* Add the legend image */}
+        <img
+          src="/try.svg" // Update the path to your image
+          alt="Building Height Legend"
+          className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
+        />
 
-      <div className=" absolute right-10 top-8">
-      <InputSelection
+        <div
+          ref={mountRef}
+          className="flex-1 border-2 border-gray-300 rounded-md shadow-md"
+          style={{ overflow: "auto", height: "90vh", width: "100%" }}
+        />
+
+        <div className=" absolute right-10 top-8">
+          <InputSelection
             selectedDate={selectedDate3d}
             setSelectedDate={setSelectedDate3d}
-           
-
           />
-      </div>
-
-      {/* Drop Down */}
-      {labelData3d && (
-        <div className="absolute bottom-0 w-[80%]">
-          <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
-        <DropDown3dViewer 
-        selectedDropdown3d={selectedDropdown3d } setSelectedDropdown3d={setSelectedDropdown3d}
-        labelData3d={labelData3d} dropdownVisible3d={dropdownVisible3d} setDropdownVisible3d={setDropdownVisible3d}/>
-          </SlideInComponent>
         </div>
-      )}
-    </div>
 
+        {/* Drop Down */}
+        {labelData3d && (
+          <div className="absolute bottom-0 w-[80%]">
+            <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
+              <div className="flex flex-row-reverse">
+                <div className="w-full">
+                  <DropDown3dViewer
+                    selectedDropdown3d={selectedDropdown3d}
+                    setSelectedDropdown3d={setSelectedDropdown3d}
+                    labelData3d={labelData3d}
+                    dropdownVisible3d={dropdownVisible3d}
+                    setDropdownVisible3d={setDropdownVisible3d}
+                  />
+                </div>
+                {selectedBuilding && (
+                  <div className="flex flex-col justify-center items-center">
+                    <div
+                      className={`
+                  grid grid-rows-20 grid-cols-20 m-2
+                  h-72 
+                  w-72`}
+                    >
+                      {rgbColor.length>0 ? (
+                        Array.from({ length: 400 }).map((_, colIndex) => (
+                          <div
+                            key={colIndex}
+                            style={{
+                              backgroundColor:
+                                rgbColor[colIndex] || "transparent",
+                            }}
+                          />
+                        ))
+                      ) : (
+                        <p>Loading...</p>
+                      )}
+                    </div>
+                    <div className="border">
+                      <p>Building Id: {selectedBuilding.buildingId}</p>
+                      <p>Height: {Math.round(selectedBuilding.height)}</p>
+                      <p>Breadth: {Math.round(selectedBuilding.breadth)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Grid For Heat Map */}
+            </SlideInComponent>
+          </div>
+        )}
+      </div>
     </>
   );
 };

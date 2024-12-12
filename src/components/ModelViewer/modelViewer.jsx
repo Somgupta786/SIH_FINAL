@@ -166,7 +166,7 @@ const ModelViewer = ({
                   geoJson.features[buildingId].properties.height
                 );
                 // console.log(color);
-                child.material.color.set(color);
+                child.material.color.set(0xffffff);
                 child.userData.isBuilding = true;
                 child.userData.buildingId = buildingId;
                 child.castShadow = true;

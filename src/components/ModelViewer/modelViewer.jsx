@@ -25,7 +25,7 @@ const ModelViewer = ({
   const [timeOfDay, setTimeOfDay] = useState(5.5);
   const [datetime, setDatetime] = useState("2024-10-26T11:28");
   const [sunPosition, setSunPosition] = useState({ x: 180, y: 90, z: 360 });
-  const [ghi, setGhi] = useState("");
+  const [ghi, setGhi] = useState(5);
   const [needleRotation, setNeedleRotation] = useState(0);
 
   const [selectedDate3d, setSelectedDate3d] = useState(new Date());
@@ -40,6 +40,7 @@ const ModelViewer = ({
 
   const [rgbColor, setRgbColor] = useState({});
   const compassRef = useRef(null);
+
   // const [ avg]
 
   useEffect(() => {
@@ -362,9 +363,9 @@ const ModelViewer = ({
             date: formattedDatetime,
             latitude: clickedMesh.userData.latitude.toString(),
             longitude: clickedMesh.userData.longitude.toString(),
-            solar_irradiance: "270",
+            solar_irradiance: ghi*50,
           };
-          // console.log("payload", payload);
+          console.log("payload", payload);
           try {
             const response = await axios.post(
               "https://solaris-1.onrender.com/api/face_potential/",
@@ -495,6 +496,8 @@ const ModelViewer = ({
           <InputSelection
             selectedDate={selectedDate3d}
             setSelectedDate={setSelectedDate3d}
+            setGhi={setGhi}
+            ghi={ghi}
           />
         </div>
 
@@ -504,7 +507,15 @@ const ModelViewer = ({
             <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
               <div className="flex flex-row-reverse">
                 <div className="w-full">
-                <div className="flex w-full items-center text-cente mt-2"><p className="text-xl w-fit border bg-backgroundGreen text-white px-4 rounded-lg font-medium mt-2 mx-auto" >Face {selectedDropdown3d}</p>
+                <div className="flex flex-col gap-2 w-full items-center text-cente mt-2">
+                <p className="text-xl w-fit border bg-backgroundGreen text-white px-4 rounded-lg font-medium mt-2 mx-auto" >Face {selectedDropdown3d}
+
+                </p>
+                {
+                ghi && <p>GHI: {ghi} kW/m <sup>2</sup> </p>
+
+                }
+                
                 </div>
                   <DropDown3dViewer
                     selectedDropdown3d={selectedDropdown3d}

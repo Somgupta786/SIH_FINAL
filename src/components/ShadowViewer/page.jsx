@@ -258,7 +258,7 @@ const ModelViewer = ({
   const handleDatetimeSubmit = async () => {
     let toastId = toast.loading("Loading...")
     try {
-      console.log("handleDatetimeSubmit shadow")
+      
       const formattedDatetime = `${datetime}:00`;
       console.log("datetime", formattedDatetime.replace("T", " "));
       const response = await fetch(

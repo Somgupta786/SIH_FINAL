@@ -30,14 +30,15 @@ const ModelViewer = ({
 
   const [selectedDate3d, setSelectedDate3d] = useState(new Date());
   const [labelData3d, setLabelData3d] = useState([]);
+  const [completeData, setCompleteData] = useState(null);
 
   const [dropdownVisible3d, setDropdownVisible3d] = useState(1);
-  const [selectedDropdown3d, setSelectedDropdown3d] = useState("face1");
+  const [selectedDropdown3d, setSelectedDropdown3d] = useState(1);
   const [isVisible, setisVisible] = useState(false);
 
   const [selectedBuilding, setSelectedBuilding] = useState(null);
 
-  const [rgbColor, setRgbColor] = useState([]);
+  const [rgbColor, setRgbColor] = useState({});
   // const [ avg]
 
   useEffect(() => {
@@ -308,7 +309,7 @@ const ModelViewer = ({
         )?.object;
 
         if (clickedMesh) {
-          console.log("Clicked building:", clickedMesh);
+          // console.log("Clicked building:", clickedMesh);
           setSelectedBuilding(clickedMesh.userData);
 
           // Highlight the clicked building
@@ -350,7 +351,7 @@ const ModelViewer = ({
             longitude: clickedMesh.userData.longitude.toString(),
             solar_irradiance: "270",
           };
-          console.log("payload", payload);
+          // console.log("payload", payload);
           try {
             const response = await axios.post(
               "https://solaris-1.onrender.com/api/face_potential/",
@@ -362,8 +363,10 @@ const ModelViewer = ({
               }
             );
             setisVisible(true);
-            console.log("API Responsecvwsfv:", response.data);
+            // console.log("API Responsecvwsfv:", response.data);
             setLabelData3d(response.data.hourly_potential);
+            setCompleteData(response.data);
+            console.log("CompleteData", response.data);
           } catch (error) {
             console.error("Error calling API:", error);
           }
@@ -377,10 +380,10 @@ const ModelViewer = ({
                 },
               }
             );
-            console.log("result heat", result.data.face1_colors.flat()[0]);
-            const color = result.data.face1_colors.flat()
-            console.log(color)
-            setRgbColor[(prev)=>color];
+            // console.log("result heat", result.data.face1_colors.flat()[0]); selectedDropdown3d face1_colors.flat();
+            const color = result.data;
+            // console.log(color);
+            setRgbColor(color);
           } catch (err) {}
         }
       }
@@ -443,9 +446,7 @@ const ModelViewer = ({
   //   }
   // };
   const handleDatetimeSubmit = () => {};
-  useEffect(() => {
-    console.log("rgbColor", rgbColor[0]);
-  }, [rgbColor]);
+
   const scaleFactor = 30;
   return (
     <>
@@ -476,6 +477,8 @@ const ModelViewer = ({
             <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
               <div className="flex flex-row-reverse">
                 <div className="w-full">
+                <div className="flex w-full items-center text-cente mt-2"><p className="text-xl w-fit border bg-backgroundGreen text-white px-2 rounded-lg font-medium mt-2 mx-auto" >Face {selectedDropdown3d}</p>
+                </div>
                   <DropDown3dViewer
                     selectedDropdown3d={selectedDropdown3d}
                     setSelectedDropdown3d={setSelectedDropdown3d}
@@ -483,6 +486,27 @@ const ModelViewer = ({
                     dropdownVisible3d={dropdownVisible3d}
                     setDropdownVisible3d={setDropdownVisible3d}
                   />
+                  <div className="flex justify-around w-full text-lg font-medium mb-2" >
+                  <p className="">
+                    Average Potential :{" "}
+                    {
+                      completeData?.average_potential[
+                        `face${selectedDropdown3d}`
+                      ]
+                    }{" "}
+                    kvh
+                  </p>
+
+                  <div>
+                    {completeData?.non_zero_periods[
+                      `face${selectedDropdown3d}`
+                    ]?.map((period, index) => (
+                      <p key={index}>
+                        Start: {period.start}, End: {period.end}
+                      </p>
+                    )) || <p>No periods available</p>}
+                  </div>
+                  </div>
                 </div>
                 {selectedBuilding && (
                   <div className="flex flex-col justify-center items-center">
@@ -492,21 +516,24 @@ const ModelViewer = ({
                   h-72 
                   w-72`}
                     >
-                      {rgbColor.length>0 ? (
-                        Array.from({ length: 400 }).map((_, colIndex) => (
-                          <div
-                            key={colIndex}
-                            style={{
-                              backgroundColor:
-                                rgbColor[colIndex] || "transparent",
-                            }}
-                          />
-                        ))
+                      {rgbColor[`face${selectedDropdown3d}_colors`] ? (
+                        rgbColor[`face${selectedDropdown3d}_colors`]
+                          .flat()
+                          .map((color, colIndex) => (
+                            <div
+                              key={colIndex}
+                              style={{
+                                backgroundColor: color || "transparent",
+                              }}
+                              className="min-w-1 min-h-1"
+                            />
+                          ))
                       ) : (
-                        <p>Loading...</p>
+                        <p>Loading heatmap...</p>
                       )}
                     </div>
-                    <div className="border">
+                    <div className="border flex justify-center items-center flex-col">
+                      <p>Face {selectedDropdown3d}</p>
                       <p>Building Id: {selectedBuilding.buildingId}</p>
                       <p>Height: {Math.round(selectedBuilding.height)}</p>
                       <p>Breadth: {Math.round(selectedBuilding.breadth)}</p>

@@ -39,6 +39,7 @@ const ModelViewer = ({
   const [selectedBuilding, setSelectedBuilding] = useState(null);
 
   const [rgbColor, setRgbColor] = useState({});
+  const compassRef = useRef(null);
   // const [ avg]
 
   useEffect(() => {
@@ -89,11 +90,23 @@ const ModelViewer = ({
     directionalLight.shadow.camera.far = 500;
 
     scene.add(directionalLight);
+    const updateCompassRotation = () => {
+      const vector = new THREE.Vector3(0, 0, -1);
+      vector.applyQuaternion(camera.quaternion); // Rotate vector based on camera orientation
+      const angle = Math.atan2(vector.x, vector.z); // Calculate rotation angle
+      const degree = (angle * (180 / Math.PI) + 360) % 360; // Convert to degrees
+
+      // Rotate the compass
+      if (compassRef.current) {
+        compassRef.current.style.transform = `rotate(${degree}deg)`;
+      }
+    };
     // Track changes in camera orientation and update compass needle
     controls.addEventListener("change", () => {
       // Calculate compass needle rotation (Y-axis rotation of the camera)
       const rotationY = Math.atan2(camera.position.x, camera.position.z);
       setNeedleRotation(-rotationY * (180 / Math.PI)); // Convert radians to degrees
+      updateCompassRotation()
     });
 
     // 🌞 Create the Sun model
@@ -453,10 +466,24 @@ const ModelViewer = ({
       <div className="flex bg-gray-200 h-screen overflow-hidden">
         {/* Add the legend image */}
         <img
-          src="/try.svg" // Update the path to your image
+          src="/bipv1.png" // Update the path to your image
           alt="Building Height Legend"
-          className="absolute top-10 left-[265px] z-10 w-20 h-auto bg-white border-2 border-black   rounded shadow-md"
+          className="absolute top-10 left-[265px] z-10 w-24 h-36 bg-white border-2 border-black   rounded shadow-md"
         />
+        <div
+        ref={compassRef} // Compass reference
+        style={{
+          position:"absolute",
+          right:"30px",
+          top:"25px",
+          width: '150px',
+          height: '150px',
+          background: 'url("/compass.png") no-repeat center center',
+          backgroundSize: 'contain',
+          transformOrigin: 'center', // Rotate from center
+          zIndex:'100'
+        }}
+      ></div>
 
         <div
           ref={mountRef}
@@ -464,7 +491,7 @@ const ModelViewer = ({
           style={{ overflow: "auto", height: "90vh", width: "100%" }}
         />
 
-        <div className=" absolute right-10 top-8">
+        <div className=" absolute right-10 top-40">
           <InputSelection
             selectedDate={selectedDate3d}
             setSelectedDate={setSelectedDate3d}
@@ -477,7 +504,7 @@ const ModelViewer = ({
             <SlideInComponent isOpen={isVisible} setIsOpen={setisVisible}>
               <div className="flex flex-row-reverse">
                 <div className="w-full">
-                <div className="flex w-full items-center text-cente mt-2"><p className="text-xl w-fit border bg-backgroundGreen text-white px-2 rounded-lg font-medium mt-2 mx-auto" >Face {selectedDropdown3d}</p>
+                <div className="flex w-full items-center text-cente mt-2"><p className="text-xl w-fit border bg-backgroundGreen text-white px-4 rounded-lg font-medium mt-2 mx-auto" >Face {selectedDropdown3d}</p>
                 </div>
                   <DropDown3dViewer
                     selectedDropdown3d={selectedDropdown3d}
@@ -494,7 +521,7 @@ const ModelViewer = ({
                         `face${selectedDropdown3d}`
                       ]
                     }{" "}
-                    kvh
+                    kwh
                   </p>
 
                   <div>

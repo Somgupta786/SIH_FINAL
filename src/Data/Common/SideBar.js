@@ -25,8 +25,8 @@ export const sideNavData = [
       link: "/impact-simulator",
     },
     {
-      title: "Settings",
-      link: "/settings",
+      title: "Testing",
+      link: "/testing",
     },
     {
       title: "Log out",

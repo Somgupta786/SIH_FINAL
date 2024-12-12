@@ -74,7 +74,7 @@ const ModelViewer = ({
     scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(
-      0xffffff,
+      0xf66f4f,
       lightIntensity
     );
     directionalLight.position.set(100, 200, 100);

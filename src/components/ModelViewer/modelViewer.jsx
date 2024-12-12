@@ -10,6 +10,7 @@ import InputSelection from "../Dashboard/input-slider/page";
 import SlideInComponent from "../Common/SlideInComponent";
 import axios from "axios";
 import DropDown3dViewer from "../Dashboard/3dViewer/DropDown";
+import toast from "react-hot-toast";
 
 const ModelViewer = ({
   shadowOpacity = 0.9,
@@ -40,6 +41,8 @@ const ModelViewer = ({
 
   const [rgbColor, setRgbColor] = useState({});
   const compassRef = useRef(null);
+
+  const [shadowData ,setShadowData] = useState({})
 
   // const [ avg]
 
@@ -365,7 +368,7 @@ const ModelViewer = ({
             longitude: clickedMesh.userData.longitude.toString(),
             solar_irradiance: ghi * 50,
           };
-          console.log("payload", payload);
+          // console.log("payload", payload);
           try {
             const response = await axios.post(
               "https://solaris-1.onrender.com/api/face_potential/",
@@ -380,7 +383,7 @@ const ModelViewer = ({
             // console.log("API Responsecvwsfv:", response.data);
             setLabelData3d(response.data.hourly_potential);
             setCompleteData(response.data);
-            console.log("CompleteData", response.data);
+            // console.log("CompleteData", response.data);
           } catch (error) {
             console.error("Error calling API:", error);
           }
@@ -399,6 +402,23 @@ const ModelViewer = ({
             // console.log(color);
             setRgbColor(color);
           } catch (err) {}
+          try{
+            const final = await axios.post(
+              "https://solaris-1.onrender.com/api/face_shadow/",
+              payload,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            toast.success("Success")
+            console.log("final",final.data)
+
+          }
+          catch(err){
+            toast.error("error")
+          }
         }
       }
     };

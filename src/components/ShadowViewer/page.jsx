@@ -101,7 +101,7 @@ const ModelViewer = ({
       const loader = new THREE.FileLoader();
       loader.load(geoJsonPath, (geoJsonData) => {
         const geoJson = JSON.parse(geoJsonData);
-        console.log(geoJson.features);
+        // console.log(geoJson.features);
         const objLoader = new OBJLoader();
         objLoader.setMaterials(materials);
         objLoader.setPath(modelPath);
@@ -126,7 +126,7 @@ const ModelViewer = ({
                   buildingScaleFactor,
                   buildingScaleFactor
                 );
-                console.log(child);
+                // console.log(child);
                 scene.add(child);
                 // Calculate the height of the building by getting its bounding box
                 const boundingBox = new THREE.Box3().setFromObject(child);

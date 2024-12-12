@@ -1,5 +1,5 @@
 import LineChartDropDown from "@/components/HeatMap/LineChartDropDown";
-import React from "react";
+import React, { useEffect } from "react";
 import { MdArrowDropDown } from "react-icons/md";
 
 const DropDown3dViewer = ({
@@ -11,6 +11,10 @@ const DropDown3dViewer = ({
 }) => {
   const faceOptions = Object.keys(labelData3d); // Get the keys dynamically (e.g., face1, face2, face3, face4)
 
+  useEffect(()=>{
+    console.log('selectedDropdown3d -->',selectedDropdown3d);
+    
+  })
   return (
     <div className="relative">
       {/* Dropdown Toggle */}
@@ -40,12 +44,12 @@ const DropDown3dViewer = ({
           <button
             key={index}
             className={`block my-1 w-fit text-left px-4 py-2 rounded-lg hover:bg-backgroundYellow/50 cursor-pointer ${
-              selectedDropdown3d === face
+              selectedDropdown3d === index+1
                 ? "bg-backgroundYellow text-black hover:bg-backgroundYellow"
                 : "bg-white text-gray-700"
             }`}
             onClick={() => {
-              setSelectedDropdown3d(face); // Update the selected dropdown
+              setSelectedDropdown3d(index+1); // Update the selected dropdown
               setDropdownVisible3d(false); // Close the dropdown
             }}
           >
@@ -58,7 +62,7 @@ const DropDown3dViewer = ({
       {selectedDropdown3d && (
         <div className="mt-4">
           <LineChartDropDown
-            labelData={labelData3d[selectedDropdown3d]}
+            labelData={labelData3d[`face${selectedDropdown3d}`]}
             label="BIPV Potential"
             title="BIPV Potential for Each Face in During the whole Day Time"
             yAxisLabel="BIPV Potential for Each Face (in kwh)"

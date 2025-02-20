@@ -66,7 +66,7 @@ const InputSelection = ({
             placeholder="Enter GHI Value"
             className="border border-black mt-2 px-1 rounded-md "
             ></input>
-            <p className="text-lg font-medium mt-2 ">GIH Value: <span className="text-red-500 font-semibold">{ghi}</span> <span  className="text-sm">kW/m <sup>2</sup></span>  </p>
+            <p className="text-lg font-medium mt-2 ">GHI Value: <span className="text-red-500 font-semibold">{ghi}</span> <span  className="text-sm">kW/m <sup>2</sup></span>  </p>
           </div>
         ) : (
           <div className="max-w-[284px] mx-auto">
